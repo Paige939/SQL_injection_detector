@@ -1,0 +1,11 @@
+data/
+target/
+db/
+.vscode/
+.idea/
+.project
+.classpath
+.settings/
+.factorypath
+.DS_Store
+Thumbs.db
