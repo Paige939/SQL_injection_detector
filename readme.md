@@ -19,14 +19,17 @@ sql_injection_detector
 ├─ pom.xml ----> Describe how to use the Maven project, dependency and plugins
 ├─ readme.md 
 ├─ SQLIA_schema.sql ----> A sqlite command file to create a database
-├─ data/----> Put all the dataset(.csv files)
+├─ data/
+│   ├─ raw  ---> Put all raw dataset (.csv files)
+│   └─ processed  ---> Put all preprocessed files for specific purpose
 ├─ db/ -----> Put database(.db files) here
 └─ src  ----> Put source code here
    ├─ main/java/tw/edu/cse/nsysu/
    │                       ├─ DataImporter.java
    │                       ├─ ExtractProcess.java
    │                       ├─ FeatureExtract.java
-   │                       ├─ .....
+   │                       ├─ ToTransactionList.java
+   │                       ├─ ......
    │                       └─ Main.java
    └─ test/java/tw/edu/cse/nsysu/
 ```
