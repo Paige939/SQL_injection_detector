@@ -124,3 +124,26 @@ In Maven, to use a certain Java util, need to add the depedency to pom.xml:
     ```
 ## Method 2: Visualize directly
 This method only need to install SQLite Veiwer extension.
+
+# Mapping table to trasaction list before doing associate rule mining
+## For Feature Vector
+
+|Vector Index | Feature meaning| Threshold | Mapping ID |
+|-----|--------|-----------|------------|
+|[0] |Length| > 100 →LONG|1 |
+|[1] |EQ(=) Number|> 3 →MANY_EQ|2|
+|[2]|WHERE Existence|== 1 →HAS_WHERE|3|
+|[2]|Mutiple WHERE (high attack risk)| >1 | 33|
+|[3]|SELECT Existence|== 1 →HAS_SELECT|4|
+|[3]|Mutiple SELECT (high attack risk)| >1 |44|
+|[4]|UNION Existence|== 1 →HAS_UNION|5|
+|[4]|Mutiple UNION (high attack risk)| >1 | 55|
+|[5]|Single Quote(') Number|> 2 →RISKY_QUOTE|6|
+|[6]|"Comment Symbols(--, #)"|> 0 → HAS_COMMENT|7|
+|[7]|OR Ratio|> 0.2 →HIGH_OR|8|
+
+## For Labels
+|Label| Meaning| Mapping ID|
+|----|----------|-----|
+| 0| Benign | 100|
+|1 | Malicious| 101|
