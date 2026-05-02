@@ -25,10 +25,7 @@ sql_injection_detector
 ├─ db/ -----> Put database(.db files) here
 └─ src  ----> Put source code here
    ├─ main/java/tw/edu/cse/nsysu/
-   │                       ├─ DataImporter.java
-   │                       ├─ ExtractProcess.java
-   │                       ├─ FeatureExtract.java
-   │                       ├─ ToTransactionList.java
+   │                       ├─ .....
    │                       ├─ ......
    │                       └─ Main.java
    └─ test/java/tw/edu/cse/nsysu/
@@ -60,6 +57,14 @@ In Maven, to use a certain Java util, need to add the depedency to pom.xml:
       <version>4.6</version>
   </dependency>
   ```
+  * SPMF:
+  ```
+  <dependency>
+      <groupId>ca.pfv.spmf</groupId>
+      <artifactId>spmf</artifactId>
+      <version>2.60</version>
+    </dependency>
+  ```
 
 # Maven related commands
 * Check **maven version**:
@@ -73,6 +78,10 @@ In Maven, to use a certain Java util, need to add the depedency to pom.xml:
 * To **clean** the previous built project:
     ```
     mvn clean
+    ```
+* To **clean and then build**:
+    ```
+    mvn clean compile
     ```
 * To **execute Main.java**:
     *By adding the following plugins in pom.xml, the Main.java execution command will be shorter:*

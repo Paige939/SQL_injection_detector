@@ -5,6 +5,13 @@ import java.io.File;
 
 public class Main{
     public static void main(String[] args){
+        //Functionality buttons
+        boolean importData=false;
+        boolean featureExtract=false;
+        boolean toSPMF=false;
+        boolean runEclat=false;
+        boolean runFPgrowth=false;
+        //Database connection string for SQLite database
         String db="jdbc:sqlite:db/SQLIA.db";
         Connection MyConn=null;
         //Declare the output file name and directory for SPMF input .txt file
@@ -15,26 +22,38 @@ public class Main{
             //Construct connection to SQLIA.db
             MyConn=DriverManager.getConnection(db);
             System.out.println("--Database connection success!--");
-            //Start import csv data into database table
-            DataImporter importer=new DataImporter(MyConn);
-            importer.Import();
-            System.out.println("--Data Import Success!--");
-            //Do feature extraction
-            FeatureExtract MyExtract=new FeatureExtract();
-            ExtractProcess processor=new ExtractProcess(MyExtract, MyConn);
-            processor.FillFeatureVector();
-            System.out.println("--Feature extraction complete!--");
-             //Make sure the output direstory exists
-            File directory = new File(OutputDir);
-            if (!directory.exists()) {
-                if (directory.mkdirs()) {
-                    System.out.println("-- Created directory: " + OutputDir + " --");
-                }
+            if (importData){
+                //Start import csv data into database table
+                DataImporter importer=new DataImporter(MyConn);
+                importer.Import();
+                System.out.println("--Data Import Success!--");
             }
-            //Transfer to SPMF input .txt file 
-            ToTransactionList transaction=new ToTransactionList(MyConn);
-            transaction.Export(OutputName);
-            
+            if(featureExtract){
+                //Do feature extraction
+                FeatureExtract MyExtract=new FeatureExtract();
+                ExtractProcess processor=new ExtractProcess(MyExtract, MyConn);
+                processor.FillFeatureVector();
+                System.out.println("--Feature extraction complete!--");
+            }
+            if(toSPMF){
+                //Make sure the output direstory exists
+                File directory = new File(OutputDir);
+                if (!directory.exists()) {
+                    if (directory.mkdirs()) {
+                        System.out.println("-- Created directory: " + OutputDir + " --");
+                    }
+                }
+                 //Transfer to SPMF input .txt file 
+                ToTransactionList transaction=new ToTransactionList(MyConn);
+                transaction.Export(OutputName);
+            }
+            //Run association rule mining algorithms
+            if(runEclat){
+                //1. Eclat
+                String eclatOutput="data/processed/Eclat_output.txt";
+                Eclat eclat=new Eclat();
+                eclat.EclatRunner(OutputName, eclatOutput);
+            }
         }catch(SQLException e){
             System.err.println("Connection to database fail: "+e.getMessage());
             e.printStackTrace();
