@@ -1,5 +1,4 @@
 data/raw
-data/processed/SPMF_input.txt
 lib/
 target/
 db/

@@ -57,7 +57,16 @@ In Maven, to use a certain Java util, need to add the depedency to pom.xml:
       <version>4.6</version>
   </dependency>
   ```
-  * SPMF:
+  
+* SPMF:   
+  If the SPMF is not found in Maven storage, download spmf.jar from the following link:     
+  url: https://www.philippe-fournier-viger.com/spmf/index.php?link=download.php       
+  Place this spmf.jar in a lib/ folder.      
+  And Execute the following command in terminal:   
+  ```
+   mvn install:install-file -Dfile=lib/spmf.jar -DgroupId=ca.pfv.spmf -DartifactId=spmf -Dversion=2.60 -Dpackaging=jar
+  ```
+  Finally, add the following dependency in pom.xml: 
   ```
   <dependency>
       <groupId>ca.pfv.spmf</groupId>
@@ -65,7 +74,6 @@ In Maven, to use a certain Java util, need to add the depedency to pom.xml:
       <version>2.60</version>
     </dependency>
   ```
-
 # Maven related commands
 * Check **maven version**:
     ```
