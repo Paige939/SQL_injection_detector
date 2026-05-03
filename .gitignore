@@ -2,6 +2,7 @@ data/raw
 lib/
 target/
 db/
+Scripts/
 .vscode/
 .idea/
 .project
