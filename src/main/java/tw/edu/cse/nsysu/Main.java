@@ -9,7 +9,7 @@ public class Main{
         boolean importData=false;
         boolean featureExtract=false;
         boolean toSPMF=false;
-        boolean runEclat=false;
+        boolean runEclat=true;
         boolean runFPgrowth=false;
         //Database connection string for SQLite database
         String db="jdbc:sqlite:db/SQLIA.db";
@@ -50,9 +50,12 @@ public class Main{
             //Run association rule mining algorithms
             if(runEclat){
                 //1. Eclat
-                String eclatOutput="data/processed/Eclat_output.txt";
+                //Declare the minimum support threshold for Eclat algorithm
+                double minSupport=0.05;
+                String eclatDir="data/processed";
+                String eclatOutput=eclatDir+"/Eclat_output_minSup_"+minSupport+".txt";
                 Eclat eclat=new Eclat();
-                eclat.EclatRunner(OutputName, eclatOutput);
+                eclat.EclatRunner(OutputName, eclatOutput, minSupport);
             }
         }catch(SQLException e){
             System.err.println("Connection to database fail: "+e.getMessage());
