@@ -9,8 +9,9 @@ public class Main{
         boolean importData=false;
         boolean featureExtract=false;
         boolean toSPMF=false;
-        boolean runEclat=true;
-        boolean runFPgrowth=false;
+        boolean runEclat=false;
+        boolean runEclatFPgrowth=false;
+        boolean runFPGrowth=false;
         //Database connection string for SQLite database
         String db="jdbc:sqlite:db/SQLIA.db";
         Connection MyConn=null;
@@ -51,11 +52,34 @@ public class Main{
             if(runEclat){
                 //1. Eclat
                 //Declare the minimum support threshold for Eclat algorithm
-                double minSupport=0.05;
+                double minSupport=0.1;
                 String eclatDir="data/processed";
                 String eclatOutput=eclatDir+"/Eclat_output_minSup_"+minSupport+".txt";
+                String eclatInput="data/processed/SPMF_input_data.txt";
                 Eclat eclat=new Eclat();
-                eclat.EclatRunner(OutputName, eclatOutput, minSupport);
+                eclat.EclatRunner(eclatInput, eclatOutput, minSupport);
+            }
+            if(runEclatFPgrowth){
+                //2. FP-Growth
+                //Declare the minimum support threshold for FP-Growth algorithm
+                double minSupport=0.05; // Assuming this is the minimum support threshold (e.g., 10%)
+                double minConf=0.8; // Assuming this is the minimum confidence threshold
+                String fpgrowthDir="data/processed";
+                String fpgrowthOutput=fpgrowthDir+"/Eclat_FPGrowth_output_minSup_"+minSupport+"_minConf_"+minConf+".txt";
+                String fpgrowthInput="data/processed/SPMF_input_data.txt";
+                Eclat_FPGrowth eclat_fpgrowth=new Eclat_FPGrowth();
+                eclat_fpgrowth.runEclat_FPGrowth(fpgrowthInput, fpgrowthOutput, minSupport, minConf);
+            }
+            if(runFPGrowth){
+                //3. FP-Growth
+                //Declare the minimum support threshold for FP-Growth algorithm
+                double minSupport=0.05; // Assuming this is the minimum support threshold (e.g., 10%)
+                double minConf=0.8; // Assuming this is the minimum confidence threshold
+                String fpgrowthDir="data/processed";
+                String fpgrowthOutput=fpgrowthDir+"/FPGrowth_output_minSup_"+minSupport+"_minConf_"+minConf+".txt";
+                String fpgrowthInput="data/processed/SPMF_input_data.txt";
+                FPGrowth fpgrowth=new FPGrowth();
+                fpgrowth.runFPGrowth(fpgrowthInput, fpgrowthOutput, minSupport, minConf);
             }
         }catch(SQLException e){
             System.err.println("Connection to database fail: "+e.getMessage());
