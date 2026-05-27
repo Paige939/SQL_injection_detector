@@ -12,11 +12,56 @@ public class Main{
         boolean runEclat=false;
         boolean runEclatFPgrowth=false;
         boolean runFPGrowth=false;
-        //Database connection string for SQLite database
+        boolean runModel=true;
+        //folder button
+        int stageNumber; //Stage number to distinguish stage 3,4,5
+        int versionNumber; //1: original version 2: weaker minConf 3: More features        //Database connection string for SQLite database
         String db="jdbc:sqlite:db/SQLIA.db";
         Connection MyConn=null;
         //Declare the output file name and directory for SPMF input .txt file
-        String OutputDir="data/processed";
+        String OutputDir;
+        //The output directory depends on stage and version number
+        //Here set the Stage number and version number
+        stageNumber=4; 
+        versionNumber=1;
+        if(stageNumber==3){
+            if(versionNumber==1)
+                OutputDir="data/processed/Stage3/Version1";
+            else if(versionNumber==2)
+                OutputDir="data/processed/Stage3/Version2";
+            else if(versionNumber==3)
+                OutputDir="data/processed/Stage3/Version3";
+            else {     
+                System.err.println("Invalid version number! Put into default directory");
+                OutputDir="data/processed";
+            }
+        }else if(stageNumber==4){
+            if(versionNumber==1)
+                OutputDir="data/processed/Stage4/Version1";
+            else if(versionNumber==2)
+                OutputDir="data/processed/Stage4/Version2";
+            else if(versionNumber==3)
+                OutputDir="data/processed/Stage4/Version3";
+            else {     
+                System.err.println("Invalid version number! Put into default directory");
+                OutputDir="data/processed";
+            }
+        }else if(stageNumber==5){
+            if(versionNumber==1)
+                OutputDir="data/processed/Stage5/Version1";
+            else if(versionNumber==2)
+                OutputDir="data/processed/Stage5/Version2";
+            else if(versionNumber==3)
+                OutputDir="data/processed/Stage5/Version3";
+            else {     
+                System.err.println("Invalid version number! Put into default directory");
+                OutputDir="data/processed";
+            }
+        }else{
+            System.err.println("Invalid stage number! Put into default directory");
+            OutputDir="data/processed"; //Default output directory
+        }
+
         String OutputFile="SPMF_input_data.txt";
         String OutputName=OutputDir+"/"+OutputFile;
         try{
@@ -46,40 +91,46 @@ public class Main{
                 }
                  //Transfer to SPMF input .txt file 
                 ToTransactionList transaction=new ToTransactionList(MyConn);
-                transaction.Export(OutputName);
+                transaction.Export(OutputName, stageNumber);
             }
             //Run association rule mining algorithms
             if(runEclat){
                 //1. Eclat
                 //Declare the minimum support threshold for Eclat algorithm
-                double minSupport=0.1;
-                String eclatDir="data/processed";
+                double minSupport=0.05;
+                String eclatDir=OutputDir;
                 String eclatOutput=eclatDir+"/Eclat_output_minSup_"+minSupport+".txt";
-                String eclatInput="data/processed/SPMF_input_data.txt";
+                String eclatInput=OutputName;
                 Eclat eclat=new Eclat();
                 eclat.EclatRunner(eclatInput, eclatOutput, minSupport);
             }
             if(runEclatFPgrowth){
                 //2. FP-Growth
                 //Declare the minimum support threshold for FP-Growth algorithm
-                double minSupport=0.05; // Assuming this is the minimum support threshold (e.g., 10%)
-                double minConf=0.8; // Assuming this is the minimum confidence threshold
-                String fpgrowthDir="data/processed";
+                double minSupport=0.1; // Assuming this is the minimum support threshold (e.g., 10%)
+                double minConf=0.6; // Assuming this is the minimum confidence threshold
+                String fpgrowthDir=OutputDir;
                 String fpgrowthOutput=fpgrowthDir+"/Eclat_FPGrowth_output_minSup_"+minSupport+"_minConf_"+minConf+".txt";
-                String fpgrowthInput="data/processed/SPMF_input_data.txt";
+                String fpgrowthInput=OutputName;
                 Eclat_FPGrowth eclat_fpgrowth=new Eclat_FPGrowth();
                 eclat_fpgrowth.runEclat_FPGrowth(fpgrowthInput, fpgrowthOutput, minSupport, minConf);
             }
             if(runFPGrowth){
                 //3. FP-Growth
                 //Declare the minimum support threshold for FP-Growth algorithm
-                double minSupport=0.05; // Assuming this is the minimum support threshold (e.g., 10%)
-                double minConf=0.8; // Assuming this is the minimum confidence threshold
-                String fpgrowthDir="data/processed";
+                double minSupport=0.1; // Assuming this is the minimum support threshold (e.g., 10%)
+                double minConf=0.6; // Assuming this is the minimum confidence threshold
+                String fpgrowthDir=OutputDir;
                 String fpgrowthOutput=fpgrowthDir+"/FPGrowth_output_minSup_"+minSupport+"_minConf_"+minConf+".txt";
-                String fpgrowthInput="data/processed/SPMF_input_data.txt";
+                String fpgrowthInput=OutputName;
                 FPGrowth fpgrowth=new FPGrowth();
                 fpgrowth.runFPGrowth(fpgrowthInput, fpgrowthOutput, minSupport, minConf);
+            }
+            if(runModel){
+                System.out.println("\n=== Base Model Training===");
+                FeatureForML Myfeatures=new FeatureForML();
+                MLTrainer trainer=new MLTrainer(Myfeatures, MyConn);
+                trainer.ModelRunner();
             }
         }catch(SQLException e){
             System.err.println("Connection to database fail: "+e.getMessage());

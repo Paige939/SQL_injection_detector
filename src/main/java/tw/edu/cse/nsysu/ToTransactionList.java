@@ -21,7 +21,7 @@ public class ToTransactionList{
     public ToTransactionList(Connection conn){
         this.conn=conn;
     }
-    public void Export(String OutputPath){
+    public void Export(String OutputPath, int stageNumber){
         String query="SELECT feature_vector, label FROM training_data";
         try(Statement stmt=conn.createStatement(); ResultSet r=stmt.executeQuery(query); PrintWriter writer=new PrintWriter(OutputPath, "UTF-8")){
            int count=0;  //count total number of data needed to be writen into .txt file
@@ -58,8 +58,10 @@ public class ToTransactionList{
                     transaction.append("7 ");
                 if(new_vector[7]>OR_ACCONT) //When query or ratio>0.2, there will be a 8 in the list
                     transaction.append("8 ");
-                //Append 100 or 101 to the transaction list according to the labels
-                transaction.append(label==1?"101 ": "100 "); //If label=1(malicious), list will contain 101; otherwise, list will contain 100
+                if(stageNumber==3){
+                    //Append 100 or 101 to the transaction list according to the labels
+                    transaction.append(label==1?"101 ": "100 "); //If label=1(malicious), list will contain 101; otherwise, list will contain 100
+                }
                 writer.println(transaction.toString());
                 count++;
             }
