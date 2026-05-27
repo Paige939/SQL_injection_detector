@@ -167,3 +167,32 @@ This method only need to install SQLite Veiwer extension.
 |----|----------|-----|
 | 0| Benign | 100|
 |1 | Malicious| 101|
+
+# Data preprocessing for Pure Rule Mining & Rule Mining + ML
+**Pure Rule Mining:** Add label 100, 101 into Transaction list.  
+**Rule Mining + ML:** Remove 100, 101 from Transaction list to prevent data leakage.
+
+# Experiment 
+### Versions
+**Version1:** Original(8 features+Rule Mining MinConf=0.6 or 0.8)  
+**Version2:** 8 features + Lower Minconf in Rule Mining  
+**Version3:** Increase the features number to more than 10 
+
+### 7 Scenarios in ML
+**Senario1:** Pure feature vectors  
+**Senario2:** Feature vectors + Frequent Patterns (MinSup=0.05)   
+**Senario3:** Feature vectors + Associate Rules(MinSup=0.1, MinConf=0.8)  
+**Senario4:** Feature vectors + Associate Rules(MinSup=0.1, MinConf=0.6)  
+**Senario5:** Feature vectors + Associate Rules(MinSup=0.05, MinConf=0.6)  
+**Senario6:** Feature vectors + Associate Rules(MinSup=0.05, MinConf=0.8)   
+**Senario7:** Feature vectors + Associate Rules(MinSup=0.1, MinConf=0.8)   
+
+### 4 kinds of tree base models
+**RandomForest:**  
+**XGBoost:**  
+**CART Tree:**  
+**LightGBM:**  
+
+### Other 2 kinds of models
+**SVM":**  
+**Naive Bayes:**
