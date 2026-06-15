@@ -194,5 +194,5 @@ This method only need to install SQLite Veiwer extension.
 **LightGBM:**  
 
 ### Other 2 kinds of models
-**SVM":**  
+**SVM:**  
 **Naive Bayes:**
