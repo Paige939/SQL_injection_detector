@@ -128,8 +128,7 @@ public class Main{
             }
             if(runModel){
                 System.out.println("\n=== Base Model Training===");
-                FeatureForML Myfeatures=new FeatureForML();
-                MLTrainer trainer=new MLTrainer(Myfeatures, MyConn);
+                MLTrainer trainer=new MLTrainer(MyConn);
                 trainer.ModelRunner();
             }
         }catch(SQLException e){

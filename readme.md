@@ -181,7 +181,7 @@ This method only need to install SQLite Veiwer extension.
 ### 7 Scenarios in ML
 **Senario1:** Pure feature vectors  
 **Senario2:** Feature vectors + Frequent Patterns (MinSup=0.05)   
-**Senario3:** Feature vectors + Associate Rules(MinSup=0.1, MinConf=0.8)  
+**Senario3:** Feature vectors + Frequent Patterns (MinSup=0.1)         
 **Senario4:** Feature vectors + Associate Rules(MinSup=0.1, MinConf=0.6)  
 **Senario5:** Feature vectors + Associate Rules(MinSup=0.05, MinConf=0.6)  
 **Senario6:** Feature vectors + Associate Rules(MinSup=0.05, MinConf=0.8)   
