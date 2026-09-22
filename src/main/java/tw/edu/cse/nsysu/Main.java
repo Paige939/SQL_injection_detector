@@ -12,7 +12,9 @@ public class Main{
         boolean runEclat=false;
         boolean runEclatFPgrowth=false;
         boolean runFPGrowth=false;
-        boolean runModel=true;
+        boolean runModel=false;
+        boolean resetIsTrained=true;
+        boolean runIncremental=true;
         //folder button
         int stageNumber; //Stage number to distinguish stage 3,4,5
         int versionNumber; //1: original version 2: weaker minConf 3: More features        //Database connection string for SQLite database
@@ -130,6 +132,17 @@ public class Main{
                 System.out.println("\n=== Base Model Training===");
                 MLTrainer trainer=new MLTrainer(MyConn);
                 trainer.ModelRunner();
+            }
+            if(resetIsTrained){
+                System.out.println("\n=== Reset isTrained Flag===");
+                ResetIsTrained resetter=new ResetIsTrained(MyConn);
+                resetter.resetIsTrained();
+                System.out.println("--Reset isTrained complete!--");
+            }
+            if(runIncremental){
+                System.out.println("\n=== Incremental Learning===");
+                IncrementalRunner incrementalRunner=new IncrementalRunner(MyConn);
+                incrementalRunner.run(2000, 256, 15); //warmupSize=2000, batchSize=256, ensembleSize=15
             }
         }catch(SQLException e){
             System.err.println("Connection to database fail: "+e.getMessage());

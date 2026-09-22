@@ -12,6 +12,7 @@ import ml.dmlc.xgboost4j.java.Booster;
 import java.sql.*;
 import java.util.*;
 import java.io.*;
+
 public class MLTrainer{
     private Connection conn;
     public MLTrainer(Connection conn){
@@ -191,6 +192,7 @@ public class MLTrainer{
             default: return "Unknown";
         }
     }
+
     // Weka model runner
     private void runWekaModel(String model_name, weka.classifiers.Classifier model, Instances train, Instances test) throws Exception {
         System.out.println("\n===" + model_name + "===");
@@ -233,7 +235,7 @@ public class MLTrainer{
         System.out.println("\n===LightGBM Training (Simulated via Weka Logistic-Trees)===");
         
         weka.classifiers.meta.LogitBoost lgbmAlternative = new weka.classifiers.meta.LogitBoost();
-        lgbmAlternative.setNumIterations(50); // 對標 50 棵樹
+        lgbmAlternative.setNumIterations(50);
         
         Instances wekaTrain = createWekaDataset(train_x, train_y, featureDim, "LGBM_Train");
         Instances wekaTest = createWekaDataset(test_x, test_y, featureDim, "LGBM_Test");
