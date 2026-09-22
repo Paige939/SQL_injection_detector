@@ -1,0 +1,7 @@
+sqlia_app/target/
+sqlia_app-git-backup/
+sqlia_web/build/
+sqlia_web/.dart_tool/
+sqlia_web/.idea/
+*.class
+*.log
