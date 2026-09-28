@@ -6,6 +6,10 @@ import weka.core.Instances;
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -24,13 +28,19 @@ public class IncrementalRunner{
                 System.out.println("No warmup data available.");
                 return; 
             }
-            float[] firstX = toFeature(warmupData.get(0).rawSql, featureEngine, situation); //Convert the first warmup SQL to feature vector
+            featureEngine.setRules(mineRules(warmupData));
+            ArmNormalProfile normalProfile = new ArmNormalProfile();
+            for (TrainRow row : warmupData) {
+                if (row.label == 0) normalProfile.update(FeatureExtract.extract(row.rawSql));
+            }
+            float[] firstX = toFeature(warmupData.get(0).rawSql, featureEngine, situation,
+                    normalProfile); //Convert the first warmup SQL to feature vector
             Instances header = createHeader(firstX.length); //Create the header for the dataset
             OnlineBagging bagging = new OnlineBagging(new NaiveBayesUpdateable(), ensembleSize, 42L); //Initialize the OnlineBagging classifier with Naive Bayes
             bagging.initialize(header); //Initialize the ensemble with the header
 
             for(TrainRow row : warmupData){ //Train the ensemble with the warmup data
-                float[] x = toFeature(row.rawSql, featureEngine, situation);
+                float[] x = toFeature(row.rawSql, featureEngine, situation, normalProfile);
                 bagging.update(x, row.label);
             }
             markAsTrained(warmupData); //Mark the warmup data as trained in the database
@@ -47,10 +57,12 @@ public class IncrementalRunner{
                 int n = 0; //Counter for the number of instances in current batch
 
                 for(TrainRow row : batch){ //Process each instance in the batch
-                    float[] x = toFeature(row.rawSql, featureEngine, situation); //Convert SQL to feature vector
+                        float[] x = toFeature(row.rawSql, featureEngine, situation,
+                            normalProfile); //Convert SQL to feature vector
                     int predictedLabel = bagging.predictLabel(x); //Predict the label using the ensemble
                     if(predictedLabel == row.label) correct++; //Increment correct counter if prediction is correct
                     bagging.update(x, row.label); //Update the ensemble with the true label
+                                        if (row.label == 0) normalProfile.update(FeatureExtract.extract(row.rawSql));
                     n++;
                 }
                 markAsTrained(batch); //Mark the batch as trained in the database
@@ -97,9 +109,45 @@ public class IncrementalRunner{
         return rows;
     }
 
-    private float[] toFeature(String rawSql, FeatureForML featureEngine, int situation){
+    private float[] toFeature(String rawSql, FeatureForML featureEngine, int situation,
+                              ArmNormalProfile normalProfile){
         double[] baseFeatures = FeatureExtract.extract(rawSql);
-        return featureEngine.getFeatureFromBase(baseFeatures, situation);
+        float[] baseAndRules = featureEngine.getFeatureFromBase(baseFeatures, situation);
+        float[] profileFeatures = normalProfile.deriveFeatures(baseFeatures);
+        int ruleCount = baseAndRules.length - baseFeatures.length;
+        float[] combined = new float[baseFeatures.length + profileFeatures.length + ruleCount];
+        for (int i = 0; i < baseFeatures.length; i++) combined[i] = (float) baseFeatures[i];
+        System.arraycopy(profileFeatures, 0, combined, baseFeatures.length, profileFeatures.length);
+        System.arraycopy(baseAndRules, baseFeatures.length, combined,
+                baseFeatures.length + profileFeatures.length, ruleCount);
+        return combined;
+    }
+
+    private List<FeatureForML.Rule> mineRules(List<TrainRow> rows) throws Exception {
+        File transactions = File.createTempFile("sqlia_incremental_train_", ".txt");
+        try {
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(transactions))) {
+                for (TrainRow row : rows) {
+                    Set<Integer> items = FeatureForML.toTransactionSet(
+                            FeatureExtract.extract(row.rawSql));
+                    items.add(row.label == 1
+                        ? FeatureForML.SQLI_LABEL_ITEM
+                        : FeatureForML.BENIGN_LABEL_ITEM);
+                    writer.write(items.stream().sorted().map(String::valueOf)
+                            .collect(java.util.stream.Collectors.joining(" ")));
+                    writer.newLine();
+                }
+            }
+            return new FPGrowth().getAssociationRules(
+                        transactions.getAbsolutePath(), 0.05, 0.6).stream()
+                    .filter(rule -> rule.getConsequent() == FeatureForML.SQLI_LABEL_ITEM)
+                    .map(rule -> new FeatureForML.Rule(
+                        rule.getAntecedent(), rule.getConsequent(),
+                        rule.getConfidence(), true))
+                    .toList();
+        } finally {
+            if (transactions.exists()) transactions.delete();
+        }
     }
 
     private Instances createHeader(int featureDimension){

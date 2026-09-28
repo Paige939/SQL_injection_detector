@@ -7,6 +7,8 @@ import java.util.Set;
 public class FeatureForML{
     // FeatureExtract returns [length, symbol density, comparison density, complexity, function density, discontinuous density].
     public static final int BASE_FEATURE_COUNT = 6;
+    public static final int BENIGN_LABEL_ITEM = 100;
+    public static final int SQLI_LABEL_ITEM = 101;
     private static final double LENGTH_HIGH = 100.0;
     private static final double SYMBOL_HIGH = 0.30;
     private static final double COMPARISON_HIGH = 0.05;
@@ -17,10 +19,24 @@ public class FeatureForML{
         int[] antecedent;
         int consequent;
         double confidence;
+        boolean consequentIsClassLabel;
         public Rule(int[] ant, int cons, double conf){
+            this(ant, cons, conf, false);
+        }
+        public Rule(int[] ant, int cons, double conf, boolean isClassLabel){
             this.antecedent=ant; //For simplicity, we only consider the first item in the antecedent
             this.consequent=cons;
             this.confidence=conf;
+            this.consequentIsClassLabel=isClassLabel;
+        }
+        public int[] getAntecedent(){
+            return antecedent.clone();
+        }
+        public int getConsequent(){
+            return consequent;
+        }
+        public double getConfidence(){
+            return confidence;
         }
     }
     private List<int[]> activePatterns = new ArrayList<>();
@@ -32,6 +48,9 @@ public class FeatureForML{
     }
     public void setRules(List<Rule> rules){
         this.activeRules=rules;
+    }
+    public int ruleCount(){
+        return activeRules.size();
     }
     //A method to transfer to transaction list
     public static Set<Integer> toTransactionSet(double[] baseVector){
@@ -95,7 +114,7 @@ public class FeatureForML{
             if(!transactionSet.contains(item))
                 return false;
         }
-        return transactionSet.contains(rule.consequent);
+        return rule.consequentIsClassLabel || transactionSet.contains(rule.consequent);
     }
     //Helper method to convert List<Float> to float[][]
     private float[] toFloatArray(List<Float> featureList){

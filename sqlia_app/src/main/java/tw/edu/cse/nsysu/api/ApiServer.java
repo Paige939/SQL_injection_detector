@@ -55,6 +55,7 @@ public class ApiServer{
                 public final boolean isWarmUp = modelState.isWarmedUp();
                 public final int totalTrained = modelState.getTotalTrained();
                 public final int normalProfileSize = modelState.getNormalProfileSize();
+                public final int fpGrowthRuleCount = modelState.getRuleFeatureCount();
                 public final java.util.Map<Integer, Integer> warmupLabelCounts = modelState.getWarmupLabelCounts();
             });
         });

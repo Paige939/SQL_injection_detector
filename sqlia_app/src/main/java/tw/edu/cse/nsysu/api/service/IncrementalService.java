@@ -42,10 +42,10 @@ public class IncrementalService {
                 detection.label,
                 request.label
             );
-            // Update the model with the new data sample, converting the SQL query into features and using the provided label.
-            modelState.update(
-                modelState.toFeature(request.sql),
-                request.label
+            modelState.applyVerifiedFeedback(
+                request.sql,
+                request.label,
+                request.label == 0
             );
 
             modelUpdated = true;

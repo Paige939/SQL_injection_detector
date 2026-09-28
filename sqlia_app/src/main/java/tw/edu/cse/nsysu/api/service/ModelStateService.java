@@ -5,6 +5,7 @@ import tw.edu.cse.nsysu.FeatureForML;
 import tw.edu.cse.nsysu.ArmNormalProfile;
 import tw.edu.cse.nsysu.api.dto.AccuracyPoint;
 import tw.edu.cse.nsysu.OnlineBagging;
+import tw.edu.cse.nsysu.FPGrowth;
 import weka.classifiers.bayes.NaiveBayesUpdateable;
 import weka.core.Instances;
 import weka.core.Attribute;
@@ -13,9 +14,12 @@ import java.util.Arrays;
 import java.sql.*;
 import java.time.Instant;
 import java.util.List;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 
 public class ModelStateService{
-    private final OnlineBagging bagging;
+    private final OnlineBagging fullFlowBagging;
     private final OnlineBagging ratioBagging;
     private final FeatureForML featureEngine = new FeatureForML();
     private final ArmNormalProfile normalProfile = new ArmNormalProfile();
@@ -27,10 +31,13 @@ public class ModelStateService{
     private final List<AccuracyPoint> accuracyHistory = new ArrayList<>(); //stores the history of accuracy points for the model
     private int totalEvaluated = 0; //total number of samples evaluated for accuracy
     private int totalCorrect = 0; //total number of correct predictions made by the model
+    private static final double RULE_MIN_SUPPORT = 0.05;
+    private static final double RULE_MIN_CONFIDENCE = 0.6;
     //Constructor to initialize the model state service with a database connection, warmup size, and ensemble size
     public ModelStateService(Connection conn, int warmupSize, int emsembleSize) throws Exception{
-        this.bagging = new OnlineBagging(new NaiveBayesUpdateable(), emsembleSize, 42L);
+        this.fullFlowBagging = new OnlineBagging(new NaiveBayesUpdateable(), emsembleSize, 42L);
         this.ratioBagging = new OnlineBagging(new NaiveBayesUpdateable(), emsembleSize, 84L);
+        featureEngine.setRules(mineTrainingRules(conn));
         warmup(conn, warmupSize);
     }
     //A method to warm up the model with initial training data
@@ -40,60 +47,61 @@ public class ModelStateService{
     private void warmup(Connection conn, int warmupSize) throws Exception{
         String sql = "SELECT raw_sql, label FROM training_data "
             + "WHERE split_group='train' ORDER BY batch_seq, id LIMIT ?";
-        //Fetch the training data from the database using a prepared statement to prevent SQL injection
+        List<WarmupRow> rows = new ArrayList<>();
         try(PreparedStatement pstmt = conn.prepareStatement(sql)){
             pstmt.setInt(1, warmupSize);
-            //Execute the query and process the result set
             try(ResultSet rs = pstmt.executeQuery()){
-                Instances header = null;
                 java.util.Set<Integer> seenLabels = new java.util.HashSet<>();
                 while(rs.next()){
-                    //Fetch raw SQL and label from the result set, convert to feature vector, and update the bagging model
                     String rawSql = rs.getString("raw_sql");
                     int label = rs.getInt("label");
+                    rows.add(new WarmupRow(rawSql, label));
                     seenLabels.add(label);
                     warmupLabelCounts.merge(label, 1, Integer::sum);
-                    float[] x = toFeature(rawSql);
-                    if(header == null){
-                        header = createHeader(x.length);
-                        bagging.initialize(header);
-                        ratioBagging.initialize(createHeader(FeatureExtract.extract(rawSql).length));
-                    }
-                    bagging.update(x, label);
-                    ratioBagging.update(toBaseFeature(rawSql), label);
                     if (label == 0) {
                         normalProfile.update(FeatureExtract.extract(rawSql));
                     }
-                    totalTrained++;
                 }
-                //Warn if warmup data is single-class, which would saturate NaiveBayes confidence to 100%
-                if(totalTrained > 0 && seenLabels.size() < 2){
+                if(!rows.isEmpty() && seenLabels.size() < 2){
                     System.err.println("[ModelStateService] WARNING: warmup data only contains label(s) " + seenLabels
                         + " - model will be biased toward this class. Check training_data ordering/sampling.");
                 }
             }
         }
+        if (!rows.isEmpty()) {
+            fullFlowBagging.initialize(createHeader(toFeature(rows.get(0).rawSql).length));
+            ratioBagging.initialize(createHeader(FeatureExtract.extract(rows.get(0).rawSql).length));
+            for (WarmupRow row : rows) {
+                fullFlowBagging.update(toFeature(row.rawSql), row.label);
+                ratioBagging.update(toBaseFeature(row.rawSql), row.label);
+                totalTrained++;
+            }
+        }
         warmedUp = totalTrained > 0;
-        System.out.println("[ModelStateService] warmup complete, trained = " + totalTrained);
+        System.out.println("[ModelStateService] warmup complete, trained = " + totalTrained
+            + ", FP-Growth rules = " + featureEngine.ruleCount());
     }
     //A method to convert raw SQL to feature vector
     public float[] toFeature(String rawSql) {
         double[] base = FeatureExtract.extract(rawSql);
         float[] arm = normalProfile.deriveFeatures(base);
-        float[] fused = new float[base.length + arm.length];
+        float[] baseAndRules = featureEngine.getFeatureFromBase(base, 4);
+        int ruleCount = baseAndRules.length - base.length;
+        float[] fused = new float[base.length + arm.length + ruleCount];
         for (int i = 0; i < base.length; i++) {
             fused[i] = (float) base[i];
         }
         System.arraycopy(arm, 0, fused, base.length, arm.length);
+        System.arraycopy(baseAndRules, base.length, fused, base.length + arm.length, ruleCount);
         return fused;
     }
     //Predict the label for the given feature vector using the bagging model
     public synchronized int predict(float[] x) throws Exception{ 
-        return bagging.predictLabel(x);
+        return fullFlowBagging.predictLabel(x);
     }
     //Predict the probability distribution for the given feature vector using the bagging model
     public synchronized double[] predictProb(float[] x) throws Exception{
-        return bagging.predictProb(x);
+        return fullFlowBagging.predictProb(x);
     }
 
     // Select the model path used by the architecture performance benchmark.
@@ -105,7 +113,7 @@ public class ModelStateService{
         if ("RATIO_INCREMENTAL_ML".equals(architecture)) {
             return ratioBagging.predictLabel(toBaseFeature(rawSql));
         }
-        return bagging.predictLabel(toFeature(rawSql));
+        return fullFlowBagging.predictLabel(toFeature(rawSql));
     }
 
     // Return the class probability used as confidence for one architecture.
@@ -119,12 +127,29 @@ public class ModelStateService{
         if ("RATIO_INCREMENTAL_ML".equals(architecture)) {
             return ratioBagging.predictProb(toBaseFeature(rawSql));
         }
-        return bagging.predictProb(toFeature(rawSql));
+        return fullFlowBagging.predictProb(toFeature(rawSql));
     }
     //Update the bagging model with the given feature vector and label
     public synchronized void update(float[] x, int label) throws Exception{
-        bagging.update(x, label);
+        fullFlowBagging.update(x, label);
         totalTrained++;
+    }
+
+    public synchronized void updateArchitecture(String rawSql, int label, String architecture)
+            throws Exception {
+        double[] base = FeatureExtract.extract(rawSql);
+        if ("ARM_PROFILE".equals(architecture)) {
+            if (label == 0) normalProfile.update(base);
+            return;
+        }
+        if ("RATIO_INCREMENTAL_ML".equals(architecture)) {
+            ratioBagging.update(toBaseFeature(rawSql), label);
+            totalTrained++;
+            return;
+        }
+        fullFlowBagging.update(toFeature(rawSql), label);
+        totalTrained++;
+        if (label == 0) normalProfile.update(base);
     }
 
     private float[] toBaseFeature(String rawSql) {
@@ -147,6 +172,47 @@ public class ModelStateService{
         ratioBagging.update(toBaseFeature(rawSql), verifiedLabel);
         if (verifiedBenign && verifiedLabel == 0) {
             normalProfile.update(FeatureExtract.extract(rawSql));
+        }
+    }
+
+    private List<FeatureForML.Rule> mineTrainingRules(Connection conn) throws Exception {
+        File transactions = File.createTempFile("sqlia_train_transactions_", ".txt");
+        try {
+            String sql = "SELECT raw_sql, label FROM training_data WHERE split_group='train' ORDER BY id";
+            try (PreparedStatement statement = conn.prepareStatement(sql);
+                 ResultSet rows = statement.executeQuery();
+                 BufferedWriter writer = new BufferedWriter(new FileWriter(transactions))) {
+                while (rows.next()) {
+                    java.util.Set<Integer> items = FeatureForML.toTransactionSet(
+                        FeatureExtract.extract(rows.getString("raw_sql")));
+                    int label = rows.getInt("label");
+                    items.add(label == 1
+                        ? FeatureForML.SQLI_LABEL_ITEM
+                        : FeatureForML.BENIGN_LABEL_ITEM);
+                    writer.write(items.stream().sorted().map(String::valueOf)
+                        .collect(java.util.stream.Collectors.joining(" ")));
+                    writer.newLine();
+                }
+            }
+            return new FPGrowth().getAssociationRules(
+                    transactions.getAbsolutePath(), RULE_MIN_SUPPORT, RULE_MIN_CONFIDENCE)
+                .stream()
+                .filter(rule -> rule.getConsequent() == FeatureForML.SQLI_LABEL_ITEM)
+                .map(rule -> new FeatureForML.Rule(
+                    rule.getAntecedent(), rule.getConsequent(),
+                    rule.getConfidence(), true))
+                .toList();
+        } finally {
+            if (transactions.exists()) transactions.delete();
+        }
+    }
+
+    private static final class WarmupRow {
+        final String rawSql;
+        final int label;
+        WarmupRow(String rawSql, int label) {
+            this.rawSql = rawSql;
+            this.label = label;
         }
     }
     //Record the evaluation of a prediction by comparing the predicted label with the true label, updating accuracy metrics, and maintaining a history of accuracy points
@@ -189,6 +255,9 @@ public class ModelStateService{
     }
     public int getNormalProfileSize() {
         return normalProfile.size();
+    }
+    public int getRuleFeatureCount() {
+        return featureEngine.ruleCount();
     }
     //Exposes warmup label distribution so callers/ops can detect a single-class (biased) warmup
     public java.util.Map<Integer, Integer> getWarmupLabelCounts(){

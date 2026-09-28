@@ -104,10 +104,9 @@ public class SimulationService {
                 modelState.recordEvaluation(predictedLabel, actualLabel);
 
                 if (request.updateModel) {
-                    modelState.update(
-                        modelState.toFeature(sql),
-                        actualLabel
-                    );
+                    String architecture = request.architecture == null
+                        ? "FULL_FLOW" : request.architecture;
+                    modelState.updateArchitecture(sql, actualLabel, architecture);
                 }
 
                 int processed = index + 1;

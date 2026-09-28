@@ -205,3 +205,31 @@ Incremental Naive Bayes Classifier
 
 # Incremental Learning Method
 Online Bagging
+
+# Implemented Detection Architectures
+The API exposes three distinct paths through `/api/architectures/predict` and
+the simulation/performance comparison endpoints:
+
+| Architecture | Prediction features or decision | Online update behavior |
+|---|---|---|
+| `ARM_PROFILE` | Normal-profile anomaly score and the 0.5 decision threshold | Adds only benign samples to the normal profile |
+| `RATIO_INCREMENTAL_ML` | Six base SQL features with an incremental Online Bagging classifier | Updates the base-feature classifier with labeled samples |
+| `FULL_FLOW` | Six base features, three normal-profile features, and FP-Growth rule features | Updates the extended classifier; verified benign samples also update the profile |
+
+`FULL_FLOW` mines association rules once during startup from transactions made
+from `split_group='train'` rows only. For rule mining, each transaction includes
+class item `100` for benign or `101` for SQLi; only rules with SQLi as the
+consequent are retained. The current thresholds are minimum support `0.05` and
+minimum confidence `0.6`. At prediction time, the unknown class item is not
+added to the query: a rule feature contains the rule confidence when all
+antecedent items match, and zero otherwise. The rule list is fixed for that
+model session, so warmup, prediction, and incremental updates share the same
+feature schema.
+
+Warmup first builds the normal profile from benign warmup rows, then trains the
+two incremental classifiers: the six-feature classifier for
+`RATIO_INCREMENTAL_ML` and the extended classifier for `FULL_FLOW`. The
+`/api/incremental/feed` endpoint treats a supplied label as verified feedback:
+it updates both classifiers and adds the sample to the normal profile only
+when the label is benign. The `/api/incremental/status` response includes
+`fpGrowthRuleCount` so the loaded rule-feature count can be checked at runtime.
