@@ -1,8 +1,6 @@
-import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../models/architecture_performance.dart';
 import '../models/architecture_prediction.dart';
 import '../providers/detection_provider.dart';
 
@@ -18,7 +16,6 @@ class _ArchitectureQueryScreenState
     extends ConsumerState<ArchitectureQueryScreen> {
   final controller = TextEditingController();
   List<ArchitecturePrediction> predictions = [];
-  List<ArchitecturePerformance> metrics = [];
   bool loading = false;
   String? error;
 
@@ -38,18 +35,12 @@ class _ArchitectureQueryScreenState
       error = null;
     });
     try {
-      final service = ref.read(architectureServiceProvider);
-      final values = await Future.wait([
-        service.predictAll(controller.text.trim()),
-        service.compare(
-          datasetPath: 'data/processed/combined_preprocessed.csv',
-          sampleSize: 200,
-        ),
-      ]);
+      final predictions = await ref
+          .read(architectureServiceProvider)
+          .predictAll(controller.text.trim());
       if (mounted) {
         setState(() {
-          predictions = values[0] as List<ArchitecturePrediction>;
-          metrics = values[1] as List<ArchitecturePerformance>;
+          this.predictions = predictions;
         });
       }
     } catch (value) {
@@ -105,53 +96,6 @@ class _ArchitectureQueryScreenState
           const SizedBox(height: 24),
           for (final prediction in predictions)
             _PredictionCard(prediction: prediction),
-          if (metrics.isNotEmpty) ...[
-            const SizedBox(height: 20),
-            Text(
-              'Architecture metric comparison',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            const SizedBox(height: 8),
-            SizedBox(
-              height: 300,
-              child: BarChart(
-                BarChartData(
-                  maxY: 1,
-                  barGroups: [
-                    for (var index = 0; index < metrics.length; index++)
-                      BarChartGroupData(
-                        x: index,
-                        barRods: [
-                          BarChartRodData(
-                            toY: metrics[index].accuracy,
-                            color: Colors.blue,
-                            width: 10,
-                          ),
-                          BarChartRodData(
-                            toY: metrics[index].precision,
-                            color: Colors.green,
-                            width: 10,
-                          ),
-                          BarChartRodData(
-                            toY: metrics[index].recall,
-                            color: Colors.orange,
-                            width: 10,
-                          ),
-                          BarChartRodData(
-                            toY: metrics[index].f1,
-                            color: Colors.red,
-                            width: 10,
-                          ),
-                        ],
-                      ),
-                  ],
-                ),
-              ),
-            ),
-            const Text(
-              'Blue Accuracy | Green Precision | Orange Recall | Red F1',
-            ),
-          ],
         ],
       ),
     );
@@ -192,13 +136,17 @@ class _PredictionCard extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'Confidence ${(prediction.confidence * 100).toStringAsFixed(1)}% | '
-              'Benign ${(prediction.benignProbability * 100).toStringAsFixed(1)}% | '
-              'Malicious ${(prediction.maliciousProbability * 100).toStringAsFixed(1)}%',
+              'Confidence ${_formatPercent(prediction.confidence)} | '
+              'Benign ${_formatPercent(prediction.benignProbability)} | '
+              'Malicious ${_formatPercent(prediction.maliciousProbability)}',
             ),
           ],
         ),
       ),
     );
+  }
+
+  String _formatPercent(double value) {
+    return '${(value * 100).toStringAsFixed(1)}%';
   }
 }

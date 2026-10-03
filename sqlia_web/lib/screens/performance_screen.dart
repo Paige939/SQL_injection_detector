@@ -14,8 +14,8 @@ class PerformanceScreen extends ConsumerStatefulWidget {
 }
 
 class _PerformanceScreenState extends ConsumerState<PerformanceScreen> {
-  final sampleController = TextEditingController(text: '200');
-  String dataset = 'data/processed/combined_preprocessed.csv';
+  final sampleController = TextEditingController(text: '6015');
+  String dataset = 'data/processed/test_holdout.csv';
   List<ArchitecturePerformance> results = [];
   final List<List<ArchitecturePerformance>> history = [];
   bool loading = false;
@@ -78,8 +78,8 @@ class _PerformanceScreenState extends ConsumerState<PerformanceScreen> {
             ),
             items: const [
               DropdownMenuItem(
-                value: 'data/processed/combined_preprocessed.csv',
-                child: Text('Combined preprocessed dataset (3 CSVs)'),
+                value: 'data/processed/test_holdout.csv',
+                child: Text('Held-out test split (6,015 rows)'),
               ),
             ],
             onChanged: loading

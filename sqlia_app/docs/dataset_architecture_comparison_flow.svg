@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1390" viewBox="0 0 1600 1390" role="img" aria-labelledby="title desc">
+  <title id="title">Combined dataset 三架構效能比較流程</title>
+  <desc id="desc">API 啟動時先探勘規則並初始化分類器與正常 Profile。效能比較使用相同資料集與樣本數分別測試三架構，評估時 updateModel 為 false，不使用測試資料增量更新。</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L10,5 L0,10 z" fill="#52616b"/></marker>
+    <style>
+      text{font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC",sans-serif;fill:#20303a}
+      .title{font-size:34px;font-weight:700}.subtitle{font-size:17px;fill:#50616b}
+      .box{fill:#fff;stroke:#ccd7d9;stroke-width:2;rx:12}.boxtext{font-size:18px;font-weight:600}
+      .small{font-size:15px;fill:#52616b}.link{fill:none;stroke:#52616b;stroke-width:2.5;marker-end:url(#arrow)}
+      .branch{fill:none;stroke:#52616b;stroke-width:2.5}.card{fill:#f6f8f8;stroke:#d9e1e2;stroke-width:2;rx:16}
+      .head{rx:11}.headtext{font-size:20px;font-weight:700;fill:#fff}.note{fill:#fff6df;stroke:#e5c66c;stroke-width:2;rx:12}
+      .noteText{font-size:16px;font-weight:600;fill:#5e4a18}
+    </style>
+  </defs>
+  <rect width="1600" height="1390" fill="#fbfcfa"/>
+  <text class="title" x="70" y="62">Combined dataset：三架構效能比較</text>
+  <text class="subtitle" x="70" y="98">共用相同資料集與樣本數，API 依架構逐一預測、計分；比較流程不會邊測邊更新模型。</text>
+
+  <text class="boxtext" x="70" y="151">API 啟動時：先建立本次比較使用的模型狀態</text>
+  <rect class="card" x="60" y="175" width="470" height="150"/>
+  <rect class="head" x="78" y="192" width="434" height="43" fill="#b66d35"/><text class="headtext" x="295" y="221" text-anchor="middle">FP-Growth 規則（Extended 使用）</text>
+  <text class="boxtext" x="295" y="264" text-anchor="middle">從整個 train split 建立交易並探勘</text><text class="small" x="295" y="292" text-anchor="middle">只保留 SQLi 為結論的規則；規則於本次啟動固定</text>
+  <rect class="card" x="565" y="175" width="470" height="150"/>
+  <rect class="head" x="583" y="192" width="434" height="43" fill="#426f91"/><text class="headtext" x="800" y="221" text-anchor="middle">兩個增量分類器 Warmup</text>
+  <text class="boxtext" x="800" y="264" text-anchor="middle">使用 train split 的初始資料訓練</text><text class="small" x="800" y="292" text-anchor="middle">基礎特徵分類器與 Extended 分類器各自初始化</text>
+  <rect class="card" x="1070" y="175" width="470" height="150"/>
+  <rect class="head" x="1088" y="192" width="434" height="43" fill="#347a72"/><text class="headtext" x="1305" y="221" text-anchor="middle">正常 Profile 建立</text>
+  <text class="boxtext" x="1305" y="264" text-anchor="middle">只用 warmup 中標記為良性的 SQL</text><text class="small" x="1305" y="292" text-anchor="middle">供 Profile 架構與 Extended 架構使用</text>
+
+  <path class="branch" d="M295 325 V350 H800 M800 325 V350 M1305 325 V350 H800"/><path class="link" d="M800 350 V378"/>
+  <rect x="420" y="378" width="760" height="66" fill="#e9f0ee" stroke="#9bb8b1" stroke-width="2" rx="13"/>
+  <text class="boxtext" x="800" y="419" text-anchor="middle">初始化完成：三架構使用同一批初始化後的狀態</text>
+
+  <path class="link" d="M800 444 V472"/>
+  <rect class="box" x="360" y="472" width="880" height="92"/>
+  <text class="boxtext" x="800" y="508" text-anchor="middle">選擇 combined_preprocessed.csv 與樣本數 N</text>
+  <text class="small" x="800" y="537" text-anchor="middle">比較頁預設 N = 200；使用者可調整樣本數</text>
+  <path class="link" d="M800 564 V592"/>
+  <rect class="box" x="360" y="592" width="880" height="76"/>
+  <text class="boxtext" x="800" y="624" text-anchor="middle">讀取資料、固定亂數種子打亂，取相同的前 N 筆</text>
+  <text class="small" x="800" y="649" text-anchor="middle">每筆 SQL 與其資料集標籤配對供預測及評分</text>
+
+  <path class="branch" d="M800 668 V700 H295 V724 M800 700 V724 M1305 700 V724"/>
+  <path class="link" d="M295 700 V724 M800 700 V724 M1305 700 V724"/>
+
+  <rect class="card" x="45" y="736" width="500" height="280"/>
+  <rect class="head" x="63" y="754" width="464" height="52" fill="#347a72"/><text class="headtext" x="295" y="788" text-anchor="middle">Normal Profile</text>
+  <rect class="box" x="80" y="828" width="430" height="66"/><text class="boxtext" x="295" y="869" text-anchor="middle">用固定 Profile 判斷異常分數</text>
+  <path class="link" d="M295 894 V914"/>
+  <rect class="box" x="80" y="914" width="430" height="70"/><text class="boxtext" x="295" y="944" text-anchor="middle">與真實標籤比較</text><text class="small" x="295" y="968" text-anchor="middle">累計 TP、FP、TN、FN</text>
+
+  <rect class="card" x="550" y="736" width="500" height="280"/>
+  <rect class="head" x="568" y="754" width="464" height="52" fill="#426f91"/><text class="headtext" x="800" y="788" text-anchor="middle">Feature Extraction + Incremental ML</text>
+  <rect class="box" x="585" y="828" width="430" height="66"/><text class="boxtext" x="800" y="869" text-anchor="middle">六項基礎特徵交給已初始化分類器</text>
+  <path class="link" d="M800 894 V914"/>
+  <rect class="box" x="585" y="914" width="430" height="70"/><text class="boxtext" x="800" y="944" text-anchor="middle">與真實標籤比較</text><text class="small" x="800" y="968" text-anchor="middle">累計 TP、FP、TN、FN</text>
+
+  <rect class="card" x="1055" y="736" width="500" height="280"/>
+  <rect class="head" x="1073" y="754" width="464" height="52" fill="#b66d35"/><text class="headtext" x="1305" y="788" text-anchor="middle">Extended 混合架構</text>
+  <rect class="box" x="1090" y="828" width="430" height="66"/><text class="boxtext" x="1305" y="869" text-anchor="middle">基礎 + Profile + 固定規則特徵</text>
+  <path class="link" d="M1305 894 V914"/>
+  <rect class="box" x="1090" y="914" width="430" height="70"/><text class="boxtext" x="1305" y="944" text-anchor="middle">與真實標籤比較</text><text class="small" x="1305" y="968" text-anchor="middle">累計 TP、FP、TN、FN</text>
+
+  <path class="branch" d="M295 1016 V1045 H800 M800 1016 V1045 M1305 1016 V1045 H800"/><path class="link" d="M800 1045 V1070"/>
+  <rect x="250" y="1070" width="1100" height="104" fill="#e9f0ee" stroke="#9bb8b1" stroke-width="2" rx="14"/>
+  <text class="boxtext" x="800" y="1108" text-anchor="middle">每種架構各自計算效能與執行時間</text>
+  <text class="small" x="800" y="1139" text-anchor="middle">Accuracy、Precision、Recall、F1-score、Duration</text>
+  <path class="link" d="M800 1174 V1198"/>
+  <rect class="box" x="420" y="1198" width="760" height="62"/><text class="boxtext" x="800" y="1237" text-anchor="middle">畫面呈現三架構結果，供比較差異</text>
+
+  <rect class="note" x="90" y="1284" width="1420" height="78"/>
+  <text class="noteText" x="800" y="1317" text-anchor="middle">此效能比較 API 設定 updateModel = false：測試標籤只用於評分，不會更新分類器或 Profile。</text>
+  <text class="small" x="800" y="1343" text-anchor="middle">FP-Growth 規則在本次模型啟動期間固定。獨立 Attack Simulation 的更新開關是另一個流程，預設未啟用。</text>
+</svg>

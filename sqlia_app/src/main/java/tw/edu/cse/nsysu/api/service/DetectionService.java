@@ -43,7 +43,7 @@ public class DetectionService{
         List<Map<String, Object>> results = new ArrayList<>();
         for (String architecture : List.of("ARM_PROFILE", "RATIO_INCREMENTAL_ML", "FULL_FLOW")) {
             double[] probability = modelState.predictArchitectureProb(rawSql, architecture);
-            int label = probability[1] >= probability[0] ? 1 : 0;
+            int label = modelState.predictArchitecture(rawSql, architecture);
             results.add(Map.of(
                     "architecture", architecture,
                     "label", label,

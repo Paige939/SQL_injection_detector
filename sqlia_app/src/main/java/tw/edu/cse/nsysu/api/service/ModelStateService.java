@@ -11,6 +11,8 @@ import weka.core.Instances;
 import weka.core.Attribute;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Map;
 import java.sql.*;
 import java.time.Instant;
 import java.util.List;
@@ -31,8 +33,11 @@ public class ModelStateService{
     private final List<AccuracyPoint> accuracyHistory = new ArrayList<>(); //stores the history of accuracy points for the model
     private int totalEvaluated = 0; //total number of samples evaluated for accuracy
     private int totalCorrect = 0; //total number of correct predictions made by the model
+    private static final long WARMUP_SAMPLE_SEED = 20261003L;
     private static final double RULE_MIN_SUPPORT = 0.05;
     private static final double RULE_MIN_CONFIDENCE = 0.6;
+    private static final double DECISION_THRESHOLD = 0.5;
+
     //Constructor to initialize the model state service with a database connection, warmup size, and ensemble size
     public ModelStateService(Connection conn, int warmupSize, int emsembleSize) throws Exception{
         this.fullFlowBagging = new OnlineBagging(new NaiveBayesUpdateable(), emsembleSize, 42L);
@@ -40,33 +45,35 @@ public class ModelStateService{
         featureEngine.setRules(mineTrainingRules(conn));
         warmup(conn, warmupSize);
     }
-    //A method to warm up the model with initial training data
-    //Uses ORDER BY RANDOM() instead of ORDER BY id, otherwise the CSV rows (which are
-    //grouped by label, e.g. all label=1 first) would make the warmup set single-class,
-    //causing NaiveBayes to always predict one class with saturated (100%) confidence.
+    //Use a reproducible shuffled sample instead of always taking the first batch of training rows.
     private void warmup(Connection conn, int warmupSize) throws Exception{
         String sql = "SELECT raw_sql, label FROM training_data "
-            + "WHERE split_group='train' ORDER BY batch_seq, id LIMIT ?";
+            + "WHERE split_group='train' ORDER BY batch_seq, id";
         List<WarmupRow> rows = new ArrayList<>();
-        try(PreparedStatement pstmt = conn.prepareStatement(sql)){
-            pstmt.setInt(1, warmupSize);
-            try(ResultSet rs = pstmt.executeQuery()){
-                java.util.Set<Integer> seenLabels = new java.util.HashSet<>();
-                while(rs.next()){
-                    String rawSql = rs.getString("raw_sql");
-                    int label = rs.getInt("label");
-                    rows.add(new WarmupRow(rawSql, label));
-                    seenLabels.add(label);
-                    warmupLabelCounts.merge(label, 1, Integer::sum);
-                    if (label == 0) {
-                        normalProfile.update(FeatureExtract.extract(rawSql));
-                    }
-                }
-                if(!rows.isEmpty() && seenLabels.size() < 2){
-                    System.err.println("[ModelStateService] WARNING: warmup data only contains label(s) " + seenLabels
-                        + " - model will be biased toward this class. Check training_data ordering/sampling.");
-                }
+        try(PreparedStatement pstmt = conn.prepareStatement(sql);
+            ResultSet rs = pstmt.executeQuery()) {
+            while (rs.next()) {
+                rows.add(new WarmupRow(rs.getString("raw_sql"), rs.getInt("label")));
             }
+        }
+        Collections.shuffle(rows, new java.util.Random(WARMUP_SAMPLE_SEED));
+        if (warmupSize < 0) {
+            throw new IllegalArgumentException("Warmup size must not be negative.");
+        }
+        if (rows.size() > warmupSize) {
+            rows = new ArrayList<>(rows.subList(0, warmupSize));
+        }
+        java.util.Set<Integer> seenLabels = new java.util.HashSet<>();
+        for (WarmupRow row : rows) {
+            seenLabels.add(row.label);
+            warmupLabelCounts.merge(row.label, 1, Integer::sum);
+            if (row.label == 0) {
+                normalProfile.update(FeatureExtract.extract(row.rawSql));
+            }
+        }
+        if (!rows.isEmpty() && seenLabels.size() < 2) {
+            System.err.println("[ModelStateService] WARNING: warmup data only contains label(s) "
+                + seenLabels + " - model will be biased toward this class.");
         }
         if (!rows.isEmpty()) {
             fullFlowBagging.initialize(createHeader(toFeature(rows.get(0).rawSql).length));
@@ -81,6 +88,7 @@ public class ModelStateService{
         System.out.println("[ModelStateService] warmup complete, trained = " + totalTrained
             + ", FP-Growth rules = " + featureEngine.ruleCount());
     }
+
     //A method to convert raw SQL to feature vector
     public float[] toFeature(String rawSql) {
         double[] base = FeatureExtract.extract(rawSql);
@@ -97,7 +105,7 @@ public class ModelStateService{
     }
     //Predict the label for the given feature vector using the bagging model
     public synchronized int predict(float[] x) throws Exception{ 
-        return fullFlowBagging.predictLabel(x);
+        return fullFlowBagging.predictProb(x)[1] >= DECISION_THRESHOLD ? 1 : 0;
     }
     //Predict the probability distribution for the given feature vector using the bagging model
     public synchronized double[] predictProb(float[] x) throws Exception{
@@ -108,12 +116,12 @@ public class ModelStateService{
     public synchronized int predictArchitecture(String rawSql, String architecture) throws Exception {
         double[] base = FeatureExtract.extract(rawSql);
         if ("ARM_PROFILE".equals(architecture)) {
-            return normalProfile.deriveFeatures(base)[2] >= 0.5f ? 1 : 0;
+            return normalProfile.deriveFeatures(base)[2] >= DECISION_THRESHOLD ? 1 : 0;
         }
         if ("RATIO_INCREMENTAL_ML".equals(architecture)) {
-            return ratioBagging.predictLabel(toBaseFeature(rawSql));
+            return ratioBagging.predictProb(toBaseFeature(rawSql))[1] >= DECISION_THRESHOLD ? 1 : 0;
         }
-        return fullFlowBagging.predictLabel(toFeature(rawSql));
+        return fullFlowBagging.predictProb(toFeature(rawSql))[1] >= DECISION_THRESHOLD ? 1 : 0;
     }
 
     // Return the class probability used as confidence for one architecture.
@@ -263,4 +271,12 @@ public class ModelStateService{
     public java.util.Map<Integer, Integer> getWarmupLabelCounts(){
         return java.util.Collections.unmodifiableMap(warmupLabelCounts);
     }
+
+    public Map<String, Double> getArchitectureThresholds() {
+        return Map.of(
+                "ARM_PROFILE", DECISION_THRESHOLD,
+                "RATIO_INCREMENTAL_ML", DECISION_THRESHOLD,
+                "FULL_FLOW", DECISION_THRESHOLD);
+    }
+
 }

@@ -143,10 +143,10 @@ public class FeatureExtract {
             }
         }
 
-        /*Matcher commentMatcher = COMMENT_PATTERN.matcher(sql);
+        Matcher commentMatcher = COMMENT_PATTERN.matcher(sql);
         while (commentMatcher.find()) {
             count++;
-        }*/
+        }
 
         return count;
     }

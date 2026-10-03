@@ -12,6 +12,7 @@ import tw.edu.cse.nsysu.api.dto.IncrementalFeedRequest;
 import tw.edu.cse.nsysu.api.dto.VerifiedFeedbackRequest;
 import tw.edu.cse.nsysu.api.dto.SimulationJob;
 import tw.edu.cse.nsysu.api.dto.SimulationResult;
+import tw.edu.cse.nsysu.api.dto.IncrementalStatusResponse;
 import tw.edu.cse.nsysu.api.service.IncrementalService;
 import tw.edu.cse.nsysu.api.service.SimulationJobService;
 import java.sql.Connection;
@@ -51,13 +52,13 @@ public class ApiServer{
         });
         //Define an endpoint to get the model's warmup status and total number of trained instances
         app.get("/api/incremental/status", ctx -> {
-            ctx.json(new Object(){
-                public final boolean isWarmUp = modelState.isWarmedUp();
-                public final int totalTrained = modelState.getTotalTrained();
-                public final int normalProfileSize = modelState.getNormalProfileSize();
-                public final int fpGrowthRuleCount = modelState.getRuleFeatureCount();
-                public final java.util.Map<Integer, Integer> warmupLabelCounts = modelState.getWarmupLabelCounts();
-            });
+            ctx.json(new IncrementalStatusResponse(
+                    modelState.isWarmedUp(),
+                    modelState.getTotalTrained(),
+                    modelState.getNormalProfileSize(),
+                    modelState.getRuleFeatureCount(),
+                    modelState.getWarmupLabelCounts(),
+                    modelState.getArchitectureThresholds()));
         });
         //Define an endpoint to get the model's accuracy history, returning a list of AccuracyPoint objects with index, accuracy, total evaluated, and timestamp
         app.get("/api/stats/accuracy", ctx -> {
