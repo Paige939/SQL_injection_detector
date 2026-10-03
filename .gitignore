@@ -10,4 +10,5 @@ sqlia_web/**/Flutter/ephemeral/
 *.pyc
 *.swp
 .DS_Store
+._*
 Thumbs.db
