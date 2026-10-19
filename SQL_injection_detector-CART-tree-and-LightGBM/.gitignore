@@ -1,0 +1,13 @@
+data/raw
+lib/
+target/
+db/
+Scripts/
+.vscode/
+.idea/
+.project
+.classpath
+.settings/
+.factorypath
+.DS_Store
+Thumbs.db
