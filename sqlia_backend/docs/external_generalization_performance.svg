@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="3000" height="1640" viewBox="0 0 3000 1640" role="img" aria-labelledby="title desc">
+  <title id="title">External Generalization Performance</title>
+  <desc id="desc">Paired baseline versus NO_NEGATIVE rule-ablation results, seed 20261025. Pure ARM accuracy 61.67 to 92.40%, precision 57.54 to 95.74%, recall 98.91 to 89.27%, F1-score 72.76 to 92.40%. Hybrid accuracy 61.03 to 87.73%, precision 57.12 to 84.03%, recall 98.98 to 94.19%, F1-score 72.44 to 88.82%. Source: rule-ablation-20261025-1427/ablation-report.json, externalDevelopmentDiagnostics. Baseline values reproduce the original frozen evaluation. NO_NEGATIVE filters rules with negative items before classifier fitting without refilling the rule set. Thresholds are selected on Validation separately for each candidate, never on external data. Same external development dataset, not independent blind evidence. Source independence unverified; no candidate deployed. Bars use full-precision metrics; labels round to two decimals.</desc>
+  <style>
+    text{font-family:Arial,Helvetica,sans-serif;fill:#203047;font-size:35pt}
+    .title,.heading{font-size:40pt;font-weight:700}
+    .note{font-size:27pt;fill:#485a70}
+    .grid{stroke:#dfe5ec;stroke-width:2}
+    .axis{stroke:#485a70;stroke-width:3;fill:none}
+    .baseline{fill:#8c98aa}.removed{fill:#0072b2}
+  </style>
+  <rect width="3000" height="1640" fill="white"/>
+  <text class="title" x="1500" y="95" text-anchor="middle">External Generalization Performance</text>
+  <text x="1500" y="170" text-anchor="middle">Before vs. after removing negative-item rules</text>
+  <rect class="baseline" x="735" y="225" width="40" height="40" rx="4"/>
+  <text x="800" y="263">Baseline</text>
+  <rect class="removed" x="1240" y="225" width="40" height="40" rx="4"/>
+  <text x="1305" y="263">Without negative-item rules</text>
+  <text class="heading" x="840" y="355" text-anchor="middle">Pure ARM</text>
+  <text class="heading" x="2300" y="355" text-anchor="middle">Hybrid</text>
+  <text x="80" y="800" text-anchor="middle" transform="rotate(-90 80 800)">Score (%)</text>
+  <text x="1540" y="800" text-anchor="middle" transform="rotate(-90 1540 800)">Score (%)</text>
+  <path class="grid" d="M230 450 H1450 M230 590 H1450 M230 730 H1450 M230 870 H1450 M230 1010 H1450 M230 1150 H1450 M1690 450 H2910 M1690 590 H2910 M1690 730 H2910 M1690 870 H2910 M1690 1010 H2910 M1690 1150 H2910"/>
+  <path class="axis" d="M230 450 V1150 H1450 M1690 450 V1150 H2910"/>
+  <g text-anchor="end">
+    <text x="205" y="465">100</text><text x="205" y="605">80</text>
+    <text x="205" y="745">60</text><text x="205" y="885">40</text>
+    <text x="205" y="1025">20</text><text x="205" y="1165">0</text>
+    <text x="1665" y="465">100</text><text x="1665" y="605">80</text>
+    <text x="1665" y="745">60</text><text x="1665" y="885">40</text>
+    <text x="1665" y="1025">20</text><text x="1665" y="1165">0</text>
+  </g>
+  <g id="bars">
+    <rect class="baseline" x="280" y="718.302579747060" width="90" height="431.697420252940"/>
+    <rect class="removed" x="420" y="503.227892466112" width="90" height="646.772107533888"/>
+    <rect class="baseline" x="580" y="747.215038128115" width="90" height="402.784961871885"/>
+    <rect class="removed" x="720" y="479.807652956824" width="90" height="670.192347043176"/>
+    <rect class="baseline" x="880" y="457.626407174203" width="90" height="692.373592825797"/>
+    <rect class="removed" x="1020" y="525.075367296317" width="90" height="624.924632703683"/>
+    <rect class="baseline" x="1180" y="640.708135381506" width="90" height="509.291864618494"/>
+    <rect class="removed" x="1320" y="503.232622432859" width="90" height="646.767377567141"/>
+    <rect class="baseline" x="1740" y="722.801587536653" width="90" height="427.198412463347"/>
+    <rect class="removed" x="1880" y="535.888892179802" width="90" height="614.111107820198"/>
+    <rect class="baseline" x="2040" y="750.147544593702" width="90" height="399.852455406298"/>
+    <rect class="removed" x="2180" y="561.817470043573" width="90" height="588.182529956427"/>
+    <rect class="baseline" x="2340" y="457.105514214845" width="90" height="692.894485785155"/>
+    <rect class="removed" x="2480" y="490.643007059721" width="90" height="659.356992940279"/>
+    <rect class="baseline" x="2640" y="642.919081198073" width="90" height="507.080918801927"/>
+    <rect class="removed" x="2780" y="528.260556665047" width="90" height="621.739443334953"/>
+  </g>
+  <g id="values" text-anchor="middle">
+    <text x="325" y="694.302580">61.67</text><text x="465" y="479.227892">92.40</text>
+    <text x="625" y="723.215038">57.54</text><text x="765" y="455.807653">95.74</text>
+    <text x="925" y="433.626407">98.91</text><text x="1065" y="501.075367">89.27</text>
+    <text x="1225" y="616.708135">72.76</text><text x="1365" y="479.232622">92.40</text>
+    <text x="1785" y="698.801588">61.03</text><text x="1925" y="511.888892">87.73</text>
+    <text x="2085" y="726.147545">57.12</text><text x="2225" y="537.817470">84.03</text>
+    <text x="2385" y="433.105514">98.98</text><text x="2525" y="466.643007">94.19</text>
+    <text x="2685" y="618.919081">72.44</text><text x="2825" y="504.260557">88.82</text>
+  </g>
+  <g text-anchor="middle">
+    <text x="395" y="1230">Accuracy</text><text x="695" y="1230">Precision</text>
+    <text x="995" y="1230">Recall</text><text x="1295" y="1230">F1-score</text>
+    <text x="1855" y="1230">Accuracy</text><text x="2155" y="1230">Precision</text>
+    <text x="2455" y="1230">Recall</text><text x="2755" y="1230">F1-score</text>
+    <text x="1500" y="1330">Both architectures: higher accuracy, precision and F1-score, but lower recall.</text>
+    <text class="note" x="1500" y="1410">101,289 overlap-filtered external inputs. Paired ablation, seed 20261025; all values in percent.</text>
+    <text class="note" x="1500" y="1470">Rules filtered before classifier fitting; thresholds selected separately on Validation only.</text>
+    <text class="note" x="1500" y="1530">Same external development data, not an independent blind test. Source independence unverified.</text>
+    <text class="note" x="1500" y="1590">Research candidates only; no model deployed. Hybrid results vary with training seed.</text>
+  </g>
+</svg>

@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="950" viewBox="0 0 1600 950" role="img" aria-labelledby="title desc">
+  <title id="title">基於擴展關聯式法則之 SQL 注入偵測與防禦支援系統總覽</title>
+  <desc id="desc">以擴展關聯規則為核心，分開資料建置、Pure 規則判定、Hybrid 增量分類、Java 與 Flutter 平台及隔離研究評估。系統提供防禦判定支援，不是資料庫代理或已部署的自動攔截機制。</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0 0 L10 5 L0 10Z" fill="#52616b"/></marker>
+    <style>
+      text{font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC",sans-serif;fill:#20303a}
+      .title{font-size:29px;font-weight:700}.h{font-size:21px;font-weight:700}.t{font-size:18px}.s{font-size:16px;fill:#52616b}
+      .box{fill:#eef5ff;stroke:#4c78a8;stroke-width:2;rx:12}.core{fill:#eaf5ef;stroke:#43866c;stroke-width:2;rx:12}
+      .note{fill:#fff6df;stroke:#c8a94e;stroke-width:2;rx:12}.link{fill:none;stroke:#52616b;stroke-width:2;marker-end:url(#arrow)}
+    </style>
+  </defs>
+  <rect width="1600" height="950" fill="#fbfcfa"/>
+  <text class="title" x="50" y="52">基於擴展關聯式法則來探勘資料庫 SQL 注入攻擊防禦機制設計與製作</text>
+  <text class="s" x="50" y="85">Design and Implementation of Database SQL Injection Defense Mechanism by Using the Extended Association Rule Mining Process</text>
+  <rect class="box" x="50" y="115" width="1500" height="95"/>
+  <text class="h" x="75" y="151">資料建置：SQL／payload CSV → 前處理、標籤檢查、去重、分組 → Training／Validation／Test</text>
+  <text class="t" x="75" y="183">SQLite DataTable 支援網站；研究訓練另用隔離資料連線。外部 CSV 不自動匯入網站或 Training。</text>
+  <path class="link" d="M800 210 V240"/>
+  <rect class="core" x="50" y="240" width="1500" height="145"/>
+  <text class="h" x="75" y="278">Extended Association Rule Mining：僅 Training 標籤參與探勘</text>
+  <text class="t" x="75" y="313">六維統計特徵 → 離散 items；28 類 token → token items、absence items 與有序 token sequence</text>
+  <text class="t" x="75" y="346">FP-Growth + Agrawal：itemset／negative rules；PrefixSpan：sequence rules → support／confidence／lift／覆蓋增益選擇</text>
+  <text class="s" x="75" y="373">固定規則 schema：順序、條件與統計量保存於模型；負向規則在現行 BASELINE 中仍存在。</text>
+  <path class="link" d="M800 385 V405 H420 V430"/>
+  <path class="link" d="M800 405 H1180 V430"/>
+  <rect class="core" x="50" y="430" width="720" height="145"/>
+  <text class="h" x="75" y="468">核心一：Pure ARM</text>
+  <text class="t" x="75" y="505">輸入匹配固定規則 → max confidence → 決策門檻</text>
+  <text class="t" x="75" y="540">無匹配為 0；無分類器、不支援增量更新</text>
+  <rect class="core" x="810" y="430" width="740" height="145"/>
+  <text class="h" x="835" y="468">核心二：ARM + Incremental Learning（Hybrid）</text>
+  <text class="t" x="835" y="505">六維數值 + K 維規則特徵 → Online Bagging／Naive Bayes</text>
+  <text class="t" x="835" y="540">可信標籤可更新分類器；固定規則不自動重挖</text>
+  <path class="link" d="M420 575 V600 H800 V625"/>
+  <path class="link" d="M1180 575 V600 H800"/>
+  <rect class="box" x="50" y="625" width="1500" height="100"/>
+  <text class="h" x="75" y="663">Java／Javalin API + Flutter Web 互動平台</text>
+  <text class="t" x="75" y="698">單筆預測、規則檢視、五架構／兩核心架構比較、Test／Replay，以及保存研究報告的唯讀展示。</text>
+  <rect class="box" x="50" y="750" width="720" height="100"/>
+  <text class="h" x="75" y="785">比較方法與研究驗證</text>
+  <text class="t" x="75" y="820">Normal Profile、六維增量分類、FULL_FLOW；來源／模板隔離</text>
+  <rect class="box" x="810" y="750" width="740" height="100"/>
+  <text class="h" x="835" y="785">首次外部評估／規則消融：分開報告</text>
+  <text class="t" x="835" y="820">凍結 checkpoint；消融僅開發診斷，不自動替換網站模型</text>
+  <rect class="note" x="50" y="875" width="1500" height="50"/>
+  <text class="t" x="75" y="907">定位：可解釋偵測與防禦決策支援。沒有將模型高分、增量能力或告警建議等同真實資料庫攔截與已證實泛化。</text>
+</svg>

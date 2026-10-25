@@ -1,14 +1,59 @@
-sqlia_app/target/
-sqlia_app-git-backup/
-sqlia_web/build/
-sqlia_web/.dart_tool/
-sqlia_web/.idea/
-sqlia_web/.flutter-plugins-dependencies
-sqlia_web/**/Flutter/ephemeral/
-*.class
-*.log
-*.pyc
-*.swp
+# OS metadata
 .DS_Store
 ._*
 Thumbs.db
+
+# Local backups
+/research_backups/
+/sqlia_app-git-backup/
+
+# Legacy build paths
+/sqlia_app/target/
+/sqlia_web/build/
+/sqlia_web/.dart_tool/
+/sqlia_web/.idea/
+/sqlia_web/.flutter-plugins-dependencies
+
+# Java build outputs
+/sqlia_backend/target/
+*.class
+
+# Local backend data and runtime state
+/sqlia_backend/data/raw/
+/sqlia_backend/data/runtime/
+/sqlia_backend/data/processed/
+/sqlia_backend/data/experiments/
+/sqlia_backend/db/
+
+# Flutter build outputs and caches
+/sqlia_frontend/build/
+/sqlia_frontend/.dart_tool/
+/sqlia_frontend/.flutter-plugins
+/sqlia_frontend/.flutter-plugins-dependencies
+/sqlia_frontend/.pub-cache/
+/sqlia_frontend/.pub/
+/sqlia_frontend/coverage/
+**/Flutter/ephemeral/
+
+# IDE settings
+/.vscode/
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Logs and temporary files
+*.log
+*.pyc
+__pycache__/
+*.swp
+*.swo
+
+# Local environment and signing credentials
+.env
+.env.*
+!.env.example
+!.env.*.example
+*.jks
+*.keystore
+key.properties

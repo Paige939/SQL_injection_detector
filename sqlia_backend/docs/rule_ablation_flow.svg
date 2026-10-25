@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000" role="img" aria-labelledby="title desc">
+  <title id="title">規則消融：開發、凍結、外部診斷與唯讀展示</title>
+  <desc id="desc">兩個種子下比較 BASELINE、NO_NEGATIVE 與 SQL_CONTEXT；同一 capped 規則集合在分類器訓練前過濾、不補回規則。以舊 Validation 選門檻，六個模型先凍結再做已揭露外部資料診斷，顯示兩種子與誤報漏報取捨，沒有部署。</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0 0 L10 5 L0 10Z" fill="#52616b"/></marker>
+    <style>
+      text{font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC",sans-serif;fill:#20303a}
+      .title{font-size:30px;font-weight:700}.h{font-size:21px;font-weight:700}.t{font-size:18px}.s{font-size:16px;fill:#52616b}
+      .box{fill:#eef5ff;stroke:#4c78a8;stroke-width:2;rx:12}.core{fill:#eaf5ef;stroke:#43866c;stroke-width:2;rx:12}
+      .note{fill:#fff6df;stroke:#c8a94e;stroke-width:2;rx:12}.link{fill:none;stroke:#52616b;stroke-width:2;marker-end:url(#arrow)}
+    </style>
+  </defs>
+  <rect width="1600" height="1000" fill="#fbfcfa"/>
+  <text class="title" x="50" y="52">Rule ablation：規則修正不是直接部署</text>
+  <text class="s" x="50" y="85">開發實驗識別誤報來源並比較代價；不是下一版模型的獨立盲測。</text>
+  <rect class="box" x="50" y="115" width="1500" height="95"/>
+  <text class="h" x="75" y="150">先核對歷史 manifest、資料與 checkpoint hash，使用新的獨立輸出目錄</text>
+  <text class="t" x="75" y="183">24,943 筆 Training；5,344 筆 Validation；種子 20261025／20261026；不讀舊 final Test。</text>
+  <path class="link" d="M800 210 V240"/>
+  <rect class="core" x="50" y="240" width="1500" height="80"/>
+  <text class="h" x="75" y="273">每個種子：相同資料順序、挖掘參數及 capped 候選規則 schema</text>
+  <text class="t" x="75" y="303">在分類器 fitting 前過濾，不補回被移除的規則；Pure 與 Hybrid 共用過濾後 schema。</text>
+  <path class="link" d="M800 320 V340 H295 V365"/>
+  <path class="link" d="M800 340 V365"/>
+  <path class="link" d="M800 340 H1305 V365"/>
+  <rect class="core" x="50" y="365" width="470" height="130"/>
+  <text class="h" x="75" y="402">BASELINE · 16 rules</text>
+  <text class="t" x="75" y="438">原版：保留固定規則</text>
+  <text class="s" x="75" y="470">核對重訓後 Validation 重現歷史結果</text>
+  <rect class="core" x="565" y="365" width="470" height="130"/>
+  <text class="h" x="590" y="402">NO_NEGATIVE · 9 rules</text>
+  <text class="t" x="590" y="438">移除所有含負向 item 的規則</text>
+  <text class="s" x="590" y="470">保留正向 itemset／sequence 規則</text>
+  <rect class="core" x="1080" y="365" width="470" height="130"/>
+  <text class="h" x="1105" y="402">SQL_CONTEXT · 1 rule</text>
+  <text class="t" x="1105" y="438">再要求比較式或多個指定 SQL token</text>
+  <text class="s" x="1105" y="470">啟發式條件，不等於 SQL 解析或攻擊證明</text>
+  <path class="link" d="M295 495 V515 H800 V540"/>
+  <path class="link" d="M800 495 V540"/>
+  <path class="link" d="M1305 495 V515 H800"/>
+  <rect class="box" x="50" y="540" width="1500" height="95"/>
+  <text class="h" x="75" y="576">六次訓練 → 逐筆驗證重載分數 → 舊 Validation 選各架構門檻 → 全部保存並凍結</text>
+  <text class="t" x="75" y="608">固定規則／分類器／門檻／checkpoint hash；尚未讀外部 export 計分，不按外部成績選勝出模型。</text>
+  <path class="link" d="M800 635 V660"/>
+  <rect class="box" x="50" y="660" width="1500" height="95"/>
+  <text class="h" x="75" y="696">已揭露的 101,289 筆外部資料 → Pure／Hybrid 開發診斷 → 保存 ablation-report.json</text>
+  <text class="t" x="75" y="728">原報告保留；衍生報告補 ROC-AUC、ROC／PR 曲線與 200 次模板 bootstrap CI，不改門檻或模型。</text>
+  <path class="link" d="M800 755 V780"/>
+  <rect class="box" x="50" y="780" width="1500" height="95"/>
+  <text class="h" x="75" y="816">External generalization → Rule ablation → 唯讀列表／詳情／JSON 下載</text>
+  <text class="t" x="75" y="848">三策略、兩種子、FPR／Recall、FP／FN 差值與 provenance；不同於 Frozen evaluation 的首次結果。</text>
+  <rect class="note" x="50" y="900" width="1500" height="75"/>
+  <text class="h" x="75" y="932">Research only — not deployed</text>
+  <text class="s" x="75" y="958">誤報下降可能增加漏報；較嚴格條件不一定較好。網站仍是 BASELINE；後續改版需要新的未使用 holdout 才能確認泛化。</text>
+</svg>

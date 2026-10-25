@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="710" viewBox="0 0 800 710">
+<rect width="800" height="710" fill="#f8fafc"/>
+<g font-family="Arial" text-anchor="middle" fill="#173b67">
+<text x="400" y="44" font-size="27" font-weight="bold">FP-Growth + Profile + Incremental ML</text>
+<text x="400" y="73" font-size="16">FULL_FLOW</text>
+<rect x="50" y="95" width="700" height="104" rx="12" fill="#fff1d6"/>
+<text x="400" y="123" font-size="18" font-weight="bold">Setup</text>
+<text x="400" y="151" font-size="16">Mine FP-Growth rules from all Training inputs.</text>
+<text x="400" y="179" font-size="16">Up to 2,000 Training inputs warm up ML and the benign profile.</text>
+<rect x="100" y="235" width="600" height="70" rx="12" fill="#e2eefa"/>
+<text x="400" y="263" font-size="19" font-weight="bold">Input</text>
+<text x="400" y="289" font-size="16">SQL, payload or user input</text>
+<rect x="100" y="343" width="600" height="80" rx="12" fill="#e2eefa"/>
+<text x="400" y="372" font-size="19" font-weight="bold">Combine features</text>
+<text x="400" y="400" font-size="16">Base features + profile features + FP-Growth rule features</text>
+<rect x="100" y="461" width="600" height="70" rx="12" fill="#e2eefa"/>
+<text x="400" y="489" font-size="19" font-weight="bold">Online Bagging</text>
+<text x="400" y="515" font-size="16">15 incremental Naive Bayes learners</text>
+<rect x="100" y="569" width="600" height="70" rx="12" fill="#e1f2e8"/>
+<text x="400" y="597" font-size="19" font-weight="bold">SQLi score &gt;= 0.5: SQLi; otherwise benign</text>
+<text x="400" y="623" font-size="16">Rules supply features, not a separate final vote</text>
+<text x="400" y="675" font-size="16">Feedback updates ML; verified benign inputs also update the profile.</text>
+<text x="400" y="698" font-size="15">Mined rules remain fixed during the website session.</text>
+</g>
+<g stroke="#173b67" stroke-width="3"><path d="M400 305 V330 M400 423 V448 M400 531 V556"/></g>
+<g fill="#173b67"><path d="M393 325 L407 325 L400 336 Z"/><path d="M393 443 L407 443 L400 454 Z"/><path d="M393 551 L407 551 L400 562 Z"/></g>
+</svg>

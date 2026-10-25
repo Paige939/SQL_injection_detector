@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1140" viewBox="0 0 1600 1140" role="img" aria-labelledby="title desc">
+  <title id="title">訓練、門檻選擇、網站比較與外部評估的隔離</title>
+  <desc id="desc">網站啟動從 Training 探勘規則並以最多兩千筆 warmup，Pure 由 Validation 校準。研究模型另以全 Training 訓練、Validation 選門檻後保存 checkpoint。網站比較、凍結外部評估、已揭露資料的規則消融與可選回饋更新是不同流程，不混用成果。</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0 0 L10 5 L0 10Z" fill="#52616b"/></marker>
+    <style>
+      text{font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC",sans-serif;fill:#20303a}
+      .title{font-size:30px;font-weight:700}.h{font-size:21px;font-weight:700}.t{font-size:18px}.s{font-size:16px;fill:#52616b}
+      .box{fill:#fff;stroke:#9bb0bb;stroke-width:2;rx:12}.web{fill:#eef5ff;stroke:#4c78a8;stroke-width:2;rx:12}
+      .research{fill:#eaf5ef;stroke:#43866c;stroke-width:2;rx:12}.note{fill:#fff6df;stroke:#c8a94e;stroke-width:2;rx:12}
+      .link{fill:none;stroke:#52616b;stroke-width:2;marker-end:url(#arrow)}
+    </style>
+  </defs>
+  <rect width="1600" height="1140" fill="#fbfcfa"/>
+  <text class="title" x="50" y="52">訓練與評估：網站互動狀態 ≠ 凍結研究模型</text>
+  <text class="s" x="50" y="85">Training 建模、Validation 選門檻、Test 計分；看過並用於開發的外部資料，不再是下一版的未使用 holdout。</text>
+  <rect class="box" x="50" y="115" width="1500" height="85"/>
+  <text class="h" x="75" y="149">原始資料 → 欄位／標籤檢查、正規化、去重與群組切分 → Training／Validation／Test</text>
+  <text class="t" x="75" y="180">規則探勘及分類器訓練只用 Training；現有 Training／Validation 仍共用 690 個較寬鬆啟發式模板，必須揭露。</text>
+  <path class="link" d="M800 200 V220 H420 V245"/>
+  <path class="link" d="M800 220 H1180 V245"/>
+  <rect class="web" x="50" y="245" width="720" height="180"/>
+  <text class="h" x="75" y="282">A. ApiServer 網站啟動</text>
+  <text class="t" x="75" y="320">Training 全 split 挖標準／擴展規則；規則於 session 固定</text>
+  <text class="t" x="75" y="353">最多 2,000 筆 warmup；良性 warmup 建立正常 Profile</text>
+  <text class="t" x="75" y="386">Pure 由 Validation 校準；其他網站預設門檻為 0.5</text>
+  <rect class="research" x="810" y="245" width="740" height="180"/>
+  <text class="h" x="835" y="282">B. 獨立研究訓練與凍結</text>
+  <text class="t" x="835" y="320">本次基準：24,943 筆 Training；5,344 筆 Validation</text>
+  <text class="t" x="835" y="353">依實驗協定訓練；各架構只在 Validation 選門檻</text>
+  <text class="t" x="835" y="386">保存 checkpoint、規則 schema、門檻與 SHA256 manifest</text>
+  <path class="link" d="M410 425 V455"/>
+  <path class="link" d="M1180 425 V455"/>
+  <rect class="web" x="50" y="455" width="720" height="190"/>
+  <text class="h" x="75" y="492">網站 Test performance／WebsiteComparisonService</text>
+  <text class="t" x="75" y="530">同一請求：全部五架構或 Pure／Hybrid；相同樣本協定</text>
+  <text class="t" x="75" y="563">鎖定當前網站狀態；updateModel = false；標籤只計分</text>
+  <text class="t" x="75" y="596">回傳混淆矩陣、Accuracy／Precision／Recall／F1 等</text>
+  <text class="s" x="75" y="626">interactive_website_snapshot：不是已保存 checkpoint 的盲測。</text>
+  <rect class="research" x="810" y="455" width="740" height="190"/>
+  <text class="h" x="835" y="492">凍結 Test／首次外部評估</text>
+  <text class="t" x="835" y="530">新 CSV 先做標籤／重疊稽核；通過條件才計分</text>
+  <text class="t" x="835" y="563">固定 checkpoint 與門檻；不重訓、不更新、不重選門檻</text>
+  <text class="t" x="835" y="596">原報告保留；衍生報告補 ROC-AUC、ROC／PR 曲線與 CI</text>
+  <text class="s" x="835" y="626">首次外部資料來源獨立性未驗證：blindTestEligible = false。</text>
+  <path class="link" d="M1180 645 V675"/>
+  <rect class="research" x="810" y="675" width="740" height="160"/>
+  <text class="h" x="835" y="712">事後診斷／Rule ablation：另一套開發實驗</text>
+  <text class="t" x="835" y="750">兩種子 × 三策略；舊 Validation 選門檻，先存六個模型</text>
+  <text class="t" x="835" y="783">已揭露外部資料只作開發診斷；不覆寫首次評估</text>
+  <text class="s" x="835" y="814">Research only — not deployed；下一版需要新的未使用 holdout。</text>
+  <rect class="note" x="50" y="675" width="720" height="160"/>
+  <text class="h" x="75" y="712">C. 回饋／Replay 更新：獨立控制的流程</text>
+  <text class="t" x="75" y="750">只有允許更新時才先預測、後以可信／資料集標籤學習</text>
+  <text class="t" x="75" y="783">Pure 不支援更新；Hybrid 只更新分類器，規則不重挖</text>
+  <text class="s" x="75" y="814">有更新的結果不能與固定模型評估混為一談；不代表已證實適應性。</text>
+  <path class="link" d="M1550 550 H1575 V865 H800 V890"/>
+  <path class="link" d="M1180 835 V865 H800"/>
+  <rect class="box" x="50" y="890" width="1500" height="100"/>
+  <text class="h" x="75" y="927">External generalization：只讀保存的報告，不使用網站即時模型重算</text>
+  <text class="t" x="75" y="960">Frozen evaluation 分頁保留首次結果；Rule ablation 分頁顯示開發比較、兩種子、取捨、來源與 JSON 下載。</text>
+  <rect class="note" x="50" y="1015" width="1500" height="95"/>
+  <text class="t" x="75" y="1050">嚴格邊界：不能用 Test／外部診斷成績選門檻，然後仍稱它為未參與開發的盲測。</text>
+  <text class="s" x="75" y="1082">目前沒有自動部署實驗勝出模型；API 重啟重新建立網站狀態，互動更新也不等同具備可還原的模型持久化。</text>
+</svg>

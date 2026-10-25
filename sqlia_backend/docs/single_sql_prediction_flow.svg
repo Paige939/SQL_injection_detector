@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1040" viewBox="0 0 1600 1040" role="img" aria-labelledby="title desc">
+  <title id="title">單筆輸入：五架構比較與 Pure／Hybrid 核心決策</title>
+  <desc id="desc">依目前 DetectionService 與 ModelStateService，單筆輸入可比較五種架構。Pure 取固定擴展規則的最高匹配 confidence；Hybrid 使用六維基礎特徵與每條擴展規則特徵，不含正常 Profile。單筆推論不更新模型，也不執行或攔截資料庫查詢。</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0 0 L10 5 L0 10Z" fill="#52616b"/></marker>
+    <style>
+      text{font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC",sans-serif;fill:#20303a}
+      .title{font-size:30px;font-weight:700}.h{font-size:22px;font-weight:700}.t{font-size:18px}.s{font-size:16px;fill:#52616b}
+      .box{fill:#fff;stroke:#9bb0bb;stroke-width:2;rx:12}.core{fill:#eaf5ef;stroke:#43866c;stroke-width:2;rx:14}
+      .other{fill:#eef5ff;stroke:#4c78a8;stroke-width:2;rx:12}.note{fill:#fff6df;stroke:#c8a94e;stroke-width:2;rx:12}
+      .link{fill:none;stroke:#52616b;stroke-width:2;marker-end:url(#arrow)}
+    </style>
+  </defs>
+  <rect width="1600" height="1040" fill="#fbfcfa"/>
+  <text class="title" x="50" y="52">單筆 SQL／payload／使用者輸入：五架構推論</text>
+  <text class="s" x="50" y="85">核心研究：PURE_EXTENDED_ARM 與 EXTENDED_ARM；其餘三種作為比較方法。</text>
+  <rect class="box" x="50" y="115" width="1500" height="95"/>
+  <text class="h" x="75" y="150">Flutter → Java API → SingleInputValidation</text>
+  <text class="t" x="75" y="182">拒絕空白／超長輸入；有效輸入才進入推論。選全部五架構，或只比較 Pure／Hybrid。</text>
+  <path class="link" d="M800 210 V240"/>
+  <rect class="box" x="50" y="240" width="1500" height="100"/>
+  <text class="h" x="75" y="275">共同轉換：各特徵流程依相同解碼規則處理輸入</text>
+  <text class="t" x="75" y="307">六維數值特徵；ExtendedRuleMiner 抽取 28 類 token、最多 40 個 token 位置，建立 items／負向 items／有序序列。</text>
+  <path class="link" d="M800 340 V360 H420 V385"/>
+  <path class="link" d="M800 360 H1180 V385"/>
+  <rect class="core" x="50" y="385" width="720" height="265"/>
+  <text class="h" x="75" y="425">Pure ARM · PURE_EXTENDED_ARM</text>
+  <text class="t" x="75" y="465">1. 比對固定 itemset／negative／sequence 規則</text>
+  <text class="t" x="75" y="500">2. score = 所有匹配規則的最高 confidence</text>
+  <text class="t" x="75" y="535">3. 無匹配時 score = 0；與 Pure 門檻比較</text>
+  <text class="t" x="75" y="575">無 ML 分類器、不接受模型更新、不在線上重挖規則</text>
+  <text class="s" x="75" y="612">訓練 confidence 不是已校準的外部攻擊機率。</text>
+  <rect class="core" x="810" y="385" width="740" height="265"/>
+  <text class="h" x="835" y="425">Hybrid · EXTENDED_ARM</text>
+  <text class="t" x="835" y="465">1. 同一固定規則 schema → K 維規則特徵</text>
+  <text class="t" x="835" y="500">2. 匹配填 confidence，否則填 0；串接六維數值特徵</text>
+  <text class="t" x="835" y="535">3. 6 + K → 15 × NaiveBayesUpdateable</text>
+  <text class="t" x="835" y="575">Online Bagging 平均類別機率 → 與 Hybrid 門檻比較</text>
+  <text class="s" x="835" y="612">不使用正常 Profile；不是把 Pure 二元答案送入分類器。</text>
+  <rect class="other" x="50" y="680" width="475" height="140"/>
+  <text class="h" x="70" y="715">ARM_PROFILE</text>
+  <text class="t" x="70" y="752">六維特徵 → 正常行為 Profile</text>
+  <text class="t" x="70" y="785">異常分數與該架構門檻比較</text>
+  <rect class="other" x="550" y="680" width="475" height="140"/>
+  <text class="h" x="570" y="715">RATIO_INCREMENTAL_ML</text>
+  <text class="t" x="570" y="752">六維數值特徵 → Online Bagging</text>
+  <text class="t" x="570" y="785">不加入 Profile 或規則特徵</text>
+  <rect class="other" x="1050" y="680" width="500" height="140"/>
+  <text class="h" x="1070" y="715">FULL_FLOW</text>
+  <text class="t" x="1070" y="752">六維 + 三項 Profile + 標準規則特徵</text>
+  <text class="t" x="1070" y="785">→ Online Bagging；非 EXTENDED_ARM</text>
+  <rect class="box" x="50" y="850" width="1500" height="70"/>
+  <text class="t" x="75" y="892">各路徑回傳預測、score、confidence 與門檻；網站彙整比較。Pure 的未達門檻結果不構成安全保證。</text>
+  <rect class="note" x="50" y="945" width="1500" height="70"/>
+  <text class="t" x="75" y="975">本圖僅為推論：不因新輸入自動學習；可信標籤回饋是另一流程，Extended 規則保持固定。</text>
+  <text class="s" x="75" y="1001">防禦支援／告警判定不等於已串接資料庫代理、防火牆或真實查詢攔截。門檻依網站／研究模型分開管理。</text>
+</svg>

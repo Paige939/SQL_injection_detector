@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="680" viewBox="0 0 800 680">
+<rect width="800" height="680" fill="#f8fafc"/>
+<g font-family="Arial" text-anchor="middle" fill="#173b67">
+<text x="400" y="44" font-size="27" font-weight="bold">Normal Profile Anomaly Detection</text>
+<text x="400" y="73" font-size="16">ARM_PROFILE | No ML classifier</text>
+<rect x="50" y="95" width="700" height="80" rx="12" fill="#fff1d6"/>
+<text x="400" y="124" font-size="18" font-weight="bold">Setup</text>
+<text x="400" y="153" font-size="16">Build the profile from benign inputs in the 2,000-row warmup.</text>
+<rect x="100" y="211" width="600" height="70" rx="12" fill="#e2eefa"/>
+<text x="400" y="239" font-size="19" font-weight="bold">Input</text>
+<text x="400" y="265" font-size="16">SQL, payload or user input</text>
+<rect x="100" y="319" width="600" height="70" rx="12" fill="#e2eefa"/>
+<text x="400" y="347" font-size="19" font-weight="bold">Extract base features</text>
+<text x="400" y="373" font-size="16">Compare with the normal profile</text>
+<rect x="100" y="427" width="600" height="70" rx="12" fill="#e2eefa"/>
+<text x="400" y="455" font-size="19" font-weight="bold">Compute anomaly score</text>
+<text x="400" y="481" font-size="16">Use the profile-derived anomaly feature</text>
+<rect x="100" y="535" width="600" height="70" rx="12" fill="#e1f2e8"/>
+<text x="400" y="563" font-size="19" font-weight="bold">Score &gt;= 0.5: SQLi; otherwise benign</text>
+<text x="400" y="589" font-size="16">No FP-Growth rule vote or ML prediction</text>
+<text x="400" y="650" font-size="16">Online update: verified benign inputs update the profile.</text>
+</g>
+<g stroke="#173b67" stroke-width="3"><path d="M400 281 V306 M400 389 V414 M400 497 V522"/></g>
+<g fill="#173b67"><path d="M393 301 L407 301 L400 312 Z"/><path d="M393 409 L407 409 L400 420 Z"/><path d="M393 517 L407 517 L400 528 Z"/></g>
+</svg>
