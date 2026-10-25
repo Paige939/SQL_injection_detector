@@ -2,9 +2,8 @@
 
 ## Repository contents and local prerequisites
 
-The current project uses `sqlia_backend` and `sqlia_frontend`, replacing the
-legacy `sqlia_app` and `sqlia_web` directories. Source code, tests, schema,
-visualization scripts and application assets are versioned.
+The project uses `sqlia_backend` and `sqlia_frontend`. Source code, tests,
+schema, visualization scripts and application assets are versioned.
 
 Datasets (`data/raw`, `data/processed`), experiment reports and model checkpoints
 (`data/experiments`), runtime state (`data/runtime`), local databases (`db`),
