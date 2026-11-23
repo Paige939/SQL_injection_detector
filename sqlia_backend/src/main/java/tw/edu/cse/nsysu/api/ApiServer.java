@@ -42,7 +42,8 @@ public class ApiServer{
         //Create a Javalin app with CORS enabled and define API endpoints for detection, simulation, and rule mining
         Javalin app = Javalin.create(config -> {
             config.bundledPlugins.enableCors(cors -> cors.addRule(rule -> rule.reflectClientOrigin = true));
-        }).start(Integer.getInteger("sqlia.port", 8080));
+        });
+        DefenseRoutes.register(app, modelState, conn);
         registerExternalReportRoutes(app, new ExternalReportService(
                 java.nio.file.Path.of("data/experiments")));
         registerRuleAblationReportRoutes(app, new RuleAblationReportService(
@@ -259,6 +260,7 @@ public class ApiServer{
             ctx.json(ruleMiningService.parseRuleFile(filePath));
         });
 
+        app.start(Integer.getInteger("sqlia.port", 8080));
         System.out.println("API server started at http://localhost:" + app.port());
         // Add a shutdown hook to gracefully shut down the simulation job service when the application is terminated
         Runtime.getRuntime().addShutdownHook(

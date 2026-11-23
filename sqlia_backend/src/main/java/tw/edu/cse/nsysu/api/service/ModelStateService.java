@@ -271,6 +271,36 @@ public class ModelStateService{
             return new ModelStateService(model);
         }
     }
+
+    synchronized ModelStateService defenseSnapshot() throws Exception {
+        var bytes = new java.io.ByteArrayOutputStream();
+        try (var output = new java.io.ObjectOutputStream(bytes)) {
+            output.writeObject(new FrozenModel(fullFlowBagging, ratioBagging, extendedBagging,
+                    featureEngine, normalProfile, extendedRules, totalTrained));
+        }
+        ModelStateService copy = loadFrozen(bytes.toByteArray());
+        copy.configureDeployment(getArchitectureThresholds(), null, true);
+        return copy;
+    }
+
+    List<DefenseModels.TrainingRow> defenseWarmupRows(Connection conn) throws SQLException {
+        List<DefenseModels.TrainingRow> rows = new ArrayList<>();
+        java.util.Set<LabeledPayload> seen = new java.util.HashSet<>();
+        try (var query = conn.prepareStatement(
+                "SELECT raw_sql,label FROM DataTable WHERE split_group='train' ORDER BY batch_seq,id");
+             var result = query.executeQuery()) {
+            while (result.next()) {
+                String raw = result.getString(1);
+                int label = result.getInt(2);
+                if (seen.add(new LabeledPayload(raw, label))) {
+                    rows.add(new DefenseModels.TrainingRow(raw, label));
+                }
+            }
+        }
+        Collections.shuffle(rows, new java.util.Random(trainingSettings.trainingOrderSeed()));
+        return List.copyOf(rows.subList(0, Math.min(totalTrained, rows.size())));
+    }
+
     void configureDeployment(Map<String, Double> thresholds, String hash, boolean frozen) {
         if (!thresholds.keySet().equals(java.util.Set.copyOf(FrozenArchitectureComparisonService.ARCHITECTURES))) {
             throw new IllegalArgumentException("Deployment requires all five architecture thresholds.");
@@ -696,10 +726,16 @@ public class ModelStateService{
     }
 
     public synchronized String extendedAction(String rawSql) throws Exception {
-        if (predictArchitecture(rawSql, "EXTENDED_ARM") == 1) return "block";
-        boolean strongRule = matchedExtendedRules(rawSql).stream()
-            .anyMatch(rule -> rule.confidence >= REVIEW_RULE_CONFIDENCE);
-        return strongRule ? "review" : "allow";
+        return defenseAction("EXTENDED_ARM", predictArchitectureProb(rawSql, "EXTENDED_ARM")[1],
+                getArchitectureThresholds().get("EXTENDED_ARM"), matchedExtendedRules(rawSql));
+    }
+
+    static String defenseAction(String architecture, double score, double threshold, List<ExtendedRule> rules) {
+        if (score >= threshold) return "block";
+        if ("PURE_EXTENDED_ARM".equals(architecture)
+                || ("EXTENDED_ARM".equals(architecture)
+                    && rules.stream().anyMatch(rule -> rule.confidence >= REVIEW_RULE_CONFIDENCE))) return "review";
+        return "allow";
     }
 
     private List<FeatureForML.Rule> mineTrainingRules(Connection conn) throws Exception {

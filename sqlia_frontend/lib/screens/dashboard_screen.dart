@@ -7,6 +7,7 @@ import 'architecture_query_screen.dart';
 import 'attack_simulation_screen.dart';
 import 'performance_screen.dart';
 import 'external_report_screen.dart';
+import 'defense_lab_screen.dart';
 import '../services/external_report_service.dart';
 
 class DashboardScreen extends StatelessWidget {
@@ -103,6 +104,18 @@ class DashboardScreen extends StatelessWidget {
                 extendedOnly: extendedOnly,
                 repository: externalReportsRepository,
               ),
+            ),
+          ),
+          _NavigationCard(
+            icon: Icons.shield_outlined,
+            title: '7. Defense laboratory',
+            description:
+                'Protected product search, durable audit and fixed Test comparisons, '
+                'including selectable Extended ARM algorithms.',
+            onTap: () => _openModeSelection(
+              context,
+              'Defense laboratory',
+              (extendedOnly) => DefenseLabScreen(extendedOnly: extendedOnly),
             ),
           ),
         ],

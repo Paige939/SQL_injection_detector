@@ -8,7 +8,13 @@
 ### 專題圖組（對應目前程式）
 
 專題題目：**基於擴展關聯式法則來探勘資料庫 SQL 注入攻擊防禦機制設計與製作**。
-系統定位是 SQLi 偵測、解釋與防禦決策支援，並未實作資料庫代理或真實查詢攔截。
+原有研究與判定頁面定位是 SQLi 偵測、解釋與防禦決策支援。新增的 Defense laboratory
+會在受控商品搜尋前檢查請求：block 直接拒絕，review 暫停並等待使用者選擇 allow 或
+block，只有 allow 才執行參數化商品查詢；它不是資料庫代理，也不攔截任意 JDBC 查詢。
+A 模式選五架構，B 模式選 Pure/Extended ARM；
+Extended ARM 可選 Online Bagging、SGD、Hoeffding Tree，並比較同一 Test 樣本。
+實驗室使用與網站回饋隔離的啟動快照；稽核持久化於本機獨立 SQLite。詳見
+[Defense laboratory](../../README.md#defense-laboratory-controlled-product-query-enforcement)。
 
 1. [專題整體架構](project_system_overview.svg)：擴展規則為核心，Java／Flutter 與研究邊界。
 2. [單筆五架構推論與 Pure／Hybrid 對照](single_sql_prediction_flow.svg)：區分兩種規則決策方式。
