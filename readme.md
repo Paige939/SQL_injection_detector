@@ -105,6 +105,9 @@ merely to run the project.
 
 ### Raw inputs
 
+The [raw dataset](https://www.kaggle.com/datasets/syedsaqlainhussain/sql-injection-dataset)
+includes `SQLiV3.csv`, `sqli.csv`, and `sqliv2.csv`.
+
 Place the following locally acquired CSVs under `sqlia_backend/data/raw/`:
 
 | File | Text column | Label column |
